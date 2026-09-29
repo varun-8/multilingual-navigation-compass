@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Multilingual Compass",
+    "slug": "multilanguage-compass",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#080B10"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.multilanguage.compass",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This application requires location access to calculate True North magnetic declination and display your current GPS coordinates.",
+        "NSMotionUsageDescription": "This application uses motion sensors (magnetometer, accelerometer, gyroscope) to calculate accurate physical compass heading and orientation."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#080B10"
+      },
+      "package": "com.multilanguage.compass",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "HIGH_SAMPLING_RATE_SENSORS"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "This application requires location access to calculate True North magnetic declination and display your current GPS coordinates."
+        }
+      ],
+      "expo-sharing",
+      "expo-status-bar"
+    ]
+  }
+}

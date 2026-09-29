@@ -1,0 +1,74 @@
+# Node modules & package dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Expo & Metro bundler
+.expo/
+.expo-shared/
+dist/
+web-build/
+.metro-health-check*
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows system files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Environment configuration & secret keys
+.env
+.env*.local
+*.pem
+*.keystore
+*.jks
+*.p12
+*.key
+*.mobileprovision
+
+# Native Android build artifacts
+android/.gradle/
+android/app/build/
+android/build/
+android/captures/
+android/.idea/
+android/local.properties
+
+# Native iOS build artifacts
+ios/build/
+ios/Pods/
+ios/DerivedData/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+
+# TypeScript & build caches
+*.tsbuildinfo
+.cache/
+
+# IDE & Editor specific files
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+
+# VS Code settings (keep project configs, ignore local state)
+.vscode/.react/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
