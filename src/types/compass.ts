@@ -1,4 +1,14 @@
-export type SupportedLanguage = 'en' | 'ta' | 'hi';
+export type SupportedLanguage = 
+  | 'en' 
+  | 'ta' 
+  | 'hi' 
+  | 'te' 
+  | 'kn' 
+  | 'ml' 
+  | 'bn' 
+  | 'mr' 
+  | 'gu' 
+  | 'pa';
 
 export type NorthReference = 'magnetic' | 'true';
 

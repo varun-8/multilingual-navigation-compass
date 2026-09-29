@@ -38,12 +38,37 @@ export const AppNavigator: React.FC = () => {
         screenOptions={{
           headerShown: false,
           animation: 'slide_from_right',
+          animationDuration: 280,
+          gestureEnabled: true,
+          fullScreenGestureEnabled: true,
+          contentStyle: {
+            backgroundColor: colors.background,
+          },
         }}
       >
         <Stack.Screen name="Compass" component={CompassScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="Calibration" component={CalibrationScreen} />
-        <Stack.Screen name="About" component={AboutScreen} />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="Calibration"
+          component={CalibrationScreen}
+          options={{
+            animation: 'slide_from_bottom',
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
+          name="About"
+          component={AboutScreen}
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

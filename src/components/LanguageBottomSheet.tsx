@@ -6,7 +6,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  ScrollView,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { SupportedLanguage } from '../types/compass';
 import { useLanguage } from '../hooks/useLanguage';
 import { useTheme } from '../hooks/useTheme';
@@ -27,6 +29,9 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
   const languages = getSupportedLanguagesList();
 
   const handleSelect = async (code: SupportedLanguage) => {
+    try {
+      await Haptics.selectionAsync();
+    } catch (e) {}
     await setLanguage(code);
     onClose();
   };
@@ -59,7 +64,11 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
               </View>
 
               {/* Language Options List */}
-              <View style={styles.list}>
+              <ScrollView
+                style={styles.scrollList}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+              >
                 {languages.map((lang) => {
                   const isSelected = language === lang.code;
                   return (
@@ -97,7 +106,7 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
                     </TouchableOpacity>
                   );
                 })}
-              </View>
+              </ScrollView>
             </View>
           </TouchableWithoutFeedback>
         </View>
@@ -109,10 +118,11 @@ export const LanguageBottomSheet: React.FC<LanguageBottomSheetProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
     justifyContent: 'flex-end',
   },
   sheet: {
+    maxHeight: '80%',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderTopWidth: 1,
@@ -131,7 +141,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   headerTitleRow: {
     flexDirection: 'row',
@@ -143,32 +153,38 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
+    backgroundColor: 'transparent',
   },
   closeBtn: {
     padding: 4,
   },
-  list: {
-    marginTop: 4,
+  scrollList: {
+    maxHeight: 380,
+  },
+  scrollContent: {
+    paddingBottom: 16,
   },
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: 14,
     borderRadius: 14,
     borderWidth: 1,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   optionTextCol: {
     flexDirection: 'column',
   },
   nativeLabel: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
+    backgroundColor: 'transparent',
   },
   englishLabel: {
-    fontSize: 13,
+    fontSize: 12,
     marginTop: 2,
+    backgroundColor: 'transparent',
   },
   checkCircle: {
     width: 24,

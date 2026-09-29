@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Share } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import * as Haptics from 'expo-haptics';
 import { LocationData } from '../types/compass';
 import { useTheme } from '../hooks/useTheme';
 import { t } from '../i18n';
-import { MapPin, Copy, Share2, Compass } from 'lucide-react-native';
+import { MapPin, Copy, Share2 } from 'lucide-react-native';
 
 interface LocationCardProps {
   location: LocationData | null;
@@ -28,6 +29,9 @@ export const LocationCard: React.FC<LocationCardProps> = ({
 
   const handleCopy = async () => {
     if (!location) return;
+    try {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (e) {}
     const text = `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
     await Clipboard.setStringAsync(text);
     setCopied(true);
@@ -36,6 +40,9 @@ export const LocationCard: React.FC<LocationCardProps> = ({
 
   const handleShare = async () => {
     if (!location) return;
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (e) {}
     const text = `My Location: ${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)} (https://maps.google.com/?q=${location.latitude},${location.longitude})`;
     try {
       await Share.share({
@@ -46,7 +53,6 @@ export const LocationCard: React.FC<LocationCardProps> = ({
       Alert.alert(t('share_location'), text);
     }
   };
-
 
   return (
     <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
@@ -59,22 +65,34 @@ export const LocationCard: React.FC<LocationCardProps> = ({
         {location && (
           <View style={styles.actionGroup}>
             <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: colors.accentLight }]}
+              style={[
+                styles.actionBtn,
+                {
+                  backgroundColor: 'transparent',
+                  borderColor: colors.cardBorder,
+                },
+              ]}
               onPress={handleCopy}
               activeOpacity={0.7}
             >
-              <Copy size={14} color={colors.accent} />
+              <Copy size={13} color={colors.accent} />
               <Text style={[styles.actionText, { color: colors.accent }]}>
                 {copied ? '✓' : t('copy_coordinates')}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.iconActionBtn, { backgroundColor: colors.accentLight }]}
+              style={[
+                styles.iconActionBtn,
+                {
+                  backgroundColor: 'transparent',
+                  borderColor: colors.cardBorder,
+                },
+              ]}
               onPress={handleShare}
               activeOpacity={0.7}
             >
-              <Share2 size={14} color={colors.accent} />
+              <Share2 size={13} color={colors.accent} />
             </TouchableOpacity>
           </View>
         )}
@@ -88,6 +106,7 @@ export const LocationCard: React.FC<LocationCardProps> = ({
           <TouchableOpacity
             style={[styles.requestBtn, { backgroundColor: colors.accent }]}
             onPress={onRequestPermission}
+            activeOpacity={0.8}
           >
             <Text style={styles.requestBtnText}>{t('request_permission')}</Text>
           </TouchableOpacity>
@@ -100,28 +119,28 @@ export const LocationCard: React.FC<LocationCardProps> = ({
         </View>
       ) : (
         <View style={styles.grid}>
-          <View style={styles.gridItem}>
+          <View style={[styles.gridItem, { borderColor: colors.cardBorder }]}>
             <Text style={[styles.label, { color: colors.textSecondary }]}>{t('latitude')}</Text>
             <Text style={[styles.value, { color: colors.textPrimary }]}>
               {formatCoord(location.latitude, 'N', 'S')}
             </Text>
           </View>
 
-          <View style={styles.gridItem}>
+          <View style={[styles.gridItem, { borderColor: colors.cardBorder }]}>
             <Text style={[styles.label, { color: colors.textSecondary }]}>{t('longitude')}</Text>
             <Text style={[styles.value, { color: colors.textPrimary }]}>
               {formatCoord(location.longitude, 'E', 'W')}
             </Text>
           </View>
 
-          <View style={styles.gridItem}>
+          <View style={[styles.gridItem, { borderColor: colors.cardBorder }]}>
             <Text style={[styles.label, { color: colors.textSecondary }]}>{t('altitude')}</Text>
             <Text style={[styles.value, { color: colors.textPrimary }]}>
               {location.altitude != null ? `${location.altitude} m` : '—'}
             </Text>
           </View>
 
-          <View style={styles.gridItem}>
+          <View style={[styles.gridItem, { borderColor: colors.cardBorder }]}>
             <Text style={[styles.label, { color: colors.textSecondary }]}>{t('declination')}</Text>
             <Text style={[styles.value, { color: colors.accent }]}>
               {location.declination > 0 ? `+${location.declination}°` : `${location.declination}°`}
@@ -136,7 +155,7 @@ export const LocationCard: React.FC<LocationCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     width: '100%',
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
     padding: 16,
     marginVertical: 10,
@@ -157,6 +176,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
+    backgroundColor: 'transparent',
   },
   actionGroup: {
     flexDirection: 'row',
@@ -167,17 +187,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 8,
+    borderRadius: 20,
+    borderWidth: 1,
     marginRight: 6,
   },
   actionText: {
     fontSize: 11,
     fontWeight: '600',
     marginLeft: 4,
+    backgroundColor: 'transparent',
   },
   iconActionBtn: {
     padding: 6,
-    borderRadius: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -187,16 +212,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     marginBottom: 10,
+    lineHeight: 18,
+    backgroundColor: 'transparent',
   },
   requestBtn: {
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 10,
   },
   requestBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
+    backgroundColor: 'transparent',
   },
   grid: {
     flexDirection: 'row',
@@ -205,10 +233,11 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: '48%',
-    marginBottom: 12,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    marginBottom: 10,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    backgroundColor: 'transparent',
   },
   label: {
     fontSize: 10,
@@ -216,11 +245,13 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 4,
+    backgroundColor: 'transparent',
   },
   value: {
     fontSize: 15,
     fontWeight: '800',
     fontVariant: ['tabular-nums'],
     letterSpacing: -0.2,
+    backgroundColor: 'transparent',
   },
 });

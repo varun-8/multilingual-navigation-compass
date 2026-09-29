@@ -37,12 +37,14 @@ export const AccuracyIndicator: React.FC<AccuracyIndicatorProps> = ({ accuracy }
     }
   };
 
+  const color = getAccuracyColor();
+
   return (
     <View style={styles.container}>
       <Text style={[styles.label, { color: colors.textSecondary }]}>{t('accuracy')}</Text>
-      <View style={[styles.badge, { backgroundColor: getAccuracyColor() + '20' }]}>
-        <View style={[styles.dot, { backgroundColor: getAccuracyColor() }]} />
-        <Text style={[styles.text, { color: getAccuracyColor() }]}>{getLabel()}</Text>
+      <View style={[styles.badge, { borderColor: color, backgroundColor: 'transparent' }]}>
+        <View style={[styles.dot, { backgroundColor: color }]} />
+        <Text style={[styles.text, { color }]}>{getLabel()}</Text>
       </View>
     </View>
   );
@@ -54,16 +56,19 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 11,
+    fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 2,
+    letterSpacing: 0.8,
+    marginBottom: 4,
+    backgroundColor: 'transparent',
   },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
   },
   dot: {
     width: 6,
@@ -73,6 +78,9 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    backgroundColor: 'transparent',
   },
 });

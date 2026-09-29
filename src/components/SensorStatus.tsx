@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { SensorStatus as StatusType, SensorAccuracy } from '../types/compass';
 import { useTheme } from '../hooks/useTheme';
 import { t } from '../i18n';
-import { AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react-native';
+import { AlertTriangle, RefreshCw } from 'lucide-react-native';
 
 interface SensorStatusProps {
   status: StatusType;
@@ -40,17 +41,11 @@ export const SensorStatus: React.FC<SensorStatusProps> = ({
     }
   };
 
-  const getAccuracyText = () => {
-    switch (accuracy) {
-      case 'high':
-        return t('accuracy_high');
-      case 'medium':
-        return t('accuracy_medium');
-      case 'low':
-        return t('accuracy_low');
-      default:
-        return t('accuracy_low');
-    }
+  const handleCalibrate = () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (e) {}
+    if (onCalibratePress) onCalibratePress();
   };
 
   return (
@@ -59,15 +54,15 @@ export const SensorStatus: React.FC<SensorStatusProps> = ({
       <View style={[styles.badge, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
         <View style={[styles.dot, { backgroundColor: getStatusColor() }]} />
         <Text style={[styles.statusText, { color: colors.textPrimary }]}>
-          {t('sensor_status')}: <Text style={{ fontWeight: '700' }}>{getStatusText()}</Text>
+          {t('sensor_status')}: <Text style={{ fontWeight: '700', color: getStatusColor() }}>{getStatusText()}</Text>
         </Text>
       </View>
 
       {/* Low Accuracy Warning Banner */}
       {status === 'needs_calibration' && (
         <TouchableOpacity
-          style={[styles.warningBanner, { backgroundColor: colors.accentLight }]}
-          onPress={onCalibratePress}
+          style={[styles.warningBanner, { backgroundColor: colors.card, borderColor: colors.warning }]}
+          onPress={handleCalibrate}
           activeOpacity={0.8}
         >
           <AlertTriangle size={18} color={colors.warning} style={styles.icon} />
@@ -88,7 +83,7 @@ export const SensorStatus: React.FC<SensorStatusProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 8,
+    marginVertical: 6,
     alignItems: 'center',
     width: '100%',
   },
@@ -96,37 +91,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 5,
     borderRadius: 20,
     borderWidth: 1,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
     marginRight: 8,
   },
   statusText: {
-    fontSize: 13,
+    fontSize: 12,
+    fontWeight: '500',
+    backgroundColor: 'transparent',
   },
   warningBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
     padding: 12,
-    borderRadius: 12,
-    marginTop: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginTop: 8,
   },
   icon: {
     marginRight: 10,
   },
   warningTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
+    backgroundColor: 'transparent',
   },
   warningSub: {
     fontSize: 12,
     fontWeight: '700',
     marginTop: 2,
+    backgroundColor: 'transparent',
   },
 });

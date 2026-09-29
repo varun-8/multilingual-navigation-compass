@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { HeadingLockState } from '../types/compass';
 import { useTheme } from '../hooks/useTheme';
 import { t } from '../i18n';
@@ -20,6 +21,17 @@ export const HeadingLockBar: React.FC<HeadingLockBarProps> = ({
 }) => {
   const { colors } = useTheme();
 
+  const handleToggle = () => {
+    try {
+      Haptics.impactAsync(
+        lockState.isLocked
+          ? Haptics.ImpactFeedbackStyle.Light
+          : Haptics.ImpactFeedbackStyle.Medium
+      );
+    } catch (e) {}
+    onToggleLock();
+  };
+
   const formattedDiff =
     difference > 0 ? `+${Math.round(difference)}°` : `${Math.round(difference)}°`;
 
@@ -29,17 +41,17 @@ export const HeadingLockBar: React.FC<HeadingLockBarProps> = ({
         style={[
           styles.lockButton,
           {
-            backgroundColor: lockState.isLocked ? colors.lockBannerBg : colors.card,
+            backgroundColor: lockState.isLocked ? colors.accentLight : colors.card,
             borderColor: lockState.isLocked ? colors.accent : colors.cardBorder,
           },
         ]}
-        onPress={onToggleLock}
+        onPress={handleToggle}
         activeOpacity={0.8}
       >
         {lockState.isLocked ? (
-          <Lock size={16} color={colors.accent} style={styles.icon} />
+          <Lock size={15} color={colors.accent} style={styles.icon} />
         ) : (
-          <Unlock size={16} color={colors.textSecondary} style={styles.icon} />
+          <Unlock size={15} color={colors.textSecondary} style={styles.icon} />
         )}
         <Text
           style={[
@@ -52,15 +64,20 @@ export const HeadingLockBar: React.FC<HeadingLockBarProps> = ({
       </TouchableOpacity>
 
       {lockState.isLocked && lockState.lockedHeading !== null && (
-        <View style={[styles.infoCard, { backgroundColor: colors.lockBannerBg, borderColor: colors.accent }]}>
+        <View
+          style={[
+            styles.infoCard,
+            { backgroundColor: colors.card, borderColor: colors.accent },
+          ]}
+        >
           <View style={styles.infoCol}>
             <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{t('locked')}</Text>
-            <Text style={[styles.infoVal, { color: colors.lockBannerText }]}>
+            <Text style={[styles.infoVal, { color: colors.accent }]}>
               {Math.round(lockState.lockedHeading)}°
             </Text>
           </View>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.cardBorder }]} />
 
           <View style={styles.infoCol}>
             <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{t('heading')}</Text>
@@ -69,7 +86,7 @@ export const HeadingLockBar: React.FC<HeadingLockBarProps> = ({
             </Text>
           </View>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.cardBorder }]} />
 
           <View style={styles.infoCol}>
             <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{t('difference')}</Text>
@@ -98,12 +115,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 11,
+    paddingVertical: 10,
     borderRadius: 24,
     borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
@@ -115,6 +132,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
+    backgroundColor: 'transparent',
   },
   infoCard: {
     flexDirection: 'row',
@@ -125,7 +143,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 16,
     borderWidth: 1,
-    marginTop: 12,
+    marginTop: 10,
   },
   infoCol: {
     alignItems: 'center',
@@ -133,13 +151,13 @@ const styles = StyleSheet.create({
   divider: {
     width: 1,
     height: 28,
-    backgroundColor: 'rgba(147, 197, 253, 0.25)',
   },
   infoLabel: {
     fontSize: 10,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
+    backgroundColor: 'transparent',
   },
   infoVal: {
     fontSize: 18,
@@ -147,5 +165,6 @@ const styles = StyleSheet.create({
     marginTop: 3,
     fontVariant: ['tabular-nums'],
     letterSpacing: -0.5,
+    backgroundColor: 'transparent',
   },
 });

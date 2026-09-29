@@ -10,18 +10,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as Haptics from 'expo-haptics';
 import { useCompass } from '../hooks/useCompass';
 import { useLocation } from '../hooks/useLocation';
 import { useTheme } from '../hooks/useTheme';
 import { t } from '../i18n';
 import { CompassDial } from '../components/CompassDial';
-import { CompassNeedle } from '../components/CompassNeedle';
 import { HeadingDisplay } from '../components/HeadingDisplay';
 import { SensorStatus } from '../components/SensorStatus';
 import { LocationCard } from '../components/LocationCard';
 import { HeadingLockBar } from '../components/HeadingLockBar';
 import { LanguageBottomSheet } from '../components/LanguageBottomSheet';
-import { Globe, Settings, Sliders, Info, RefreshCw } from 'lucide-react-native';
+import { Globe, Settings, RefreshCw } from 'lucide-react-native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Compass'>;
@@ -41,6 +41,27 @@ export const CompassScreen: React.FC = () => {
 
   const [langSheetVisible, setLangSheetVisible] = useState(false);
 
+  const handleOpenLanguage = () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (e) {}
+    setLangSheetVisible(true);
+  };
+
+  const handleOpenSettings = () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (e) {}
+    navigation.navigate('Settings');
+  };
+
+  const handleOpenCalibration = () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (e) {}
+    navigation.navigate('Calibration');
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={colors.statusBar} />
@@ -57,21 +78,21 @@ export const CompassScreen: React.FC = () => {
           {/* Language Globe Button */}
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
-            onPress={() => setLangSheetVisible(true)}
+            onPress={handleOpenLanguage}
             accessibilityLabel={t('select_language')}
             activeOpacity={0.7}
           >
-            <Globe size={20} color={colors.textPrimary} />
+            <Globe size={19} color={colors.textPrimary} />
           </TouchableOpacity>
 
           {/* Settings Button */}
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
-            onPress={() => navigation.navigate('Settings')}
+            onPress={handleOpenSettings}
             accessibilityLabel={t('settings')}
             activeOpacity={0.7}
           >
-            <Settings size={20} color={colors.textPrimary} />
+            <Settings size={19} color={colors.textPrimary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -84,24 +105,32 @@ export const CompassScreen: React.FC = () => {
         <SensorStatus
           status={compassData.sensorStatus}
           accuracy={compassData.accuracy}
-          onCalibratePress={() => navigation.navigate('Calibration')}
+          onCalibratePress={handleOpenCalibration}
         />
 
         {/* Compass Physical Interaction Area */}
         <View style={styles.compassSection}>
-          {/* Floating Calibrate Button (Top Right matching image) */}
+          {/* Floating Calibrate Button (Top Right matching modern model) */}
           <View style={styles.calibrateButtonWrapper}>
             <TouchableOpacity
-              style={styles.floatingCalibrateBtn}
-              onPress={() => navigation.navigate('Calibration')}
+              style={[
+                styles.floatingCalibrateBtn,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.cardBorder,
+                },
+              ]}
+              onPress={handleOpenCalibration}
               activeOpacity={0.8}
             >
-              <RefreshCw size={13} color="#2563EB" style={styles.calibrateIcon} />
-              <Text style={styles.floatingCalibrateText}>{t('calibrate')}</Text>
+              <RefreshCw size={12} color={colors.accent} style={styles.calibrateIcon} />
+              <Text style={[styles.floatingCalibrateText, { color: colors.textPrimary }]}>
+                {t('calibrate')}
+              </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Rotating Vector Compass Dial matching reference design */}
+          {/* Rotating Vector Compass Dial matching modern high-tech model */}
           <View style={styles.dialContainer}>
             <CompassDial
               heading={compassData.heading}
@@ -110,7 +139,7 @@ export const CompassScreen: React.FC = () => {
             />
           </View>
 
-          {/* Primary Heading Readout */}
+          {/* Primary Heading Readout with clean typography (no text bg) */}
           <HeadingDisplay
             heading={compassData.heading}
             northReference={northReference}
@@ -127,7 +156,7 @@ export const CompassScreen: React.FC = () => {
           onToggleLock={toggleHeadingLock}
         />
 
-        {/* Debug Panel (Enabled via Developer Settings) */}
+        {/* Debug Diagnostics Panel (Enabled via Developer Settings) */}
         {debugMode && (
           <View style={[styles.debugCard, { backgroundColor: colors.card, borderColor: colors.warning }]}>
             <Text style={[styles.debugTitle, { color: colors.warning }]}>
@@ -178,6 +207,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     letterSpacing: -0.5,
+    backgroundColor: 'transparent',
   },
   headerRight: {
     flexDirection: 'row',
@@ -200,59 +230,61 @@ const styles = StyleSheet.create({
   compassSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 12,
+    marginVertical: 8,
     width: '100%',
     position: 'relative',
   },
   calibrateButtonWrapper: {
     width: '100%',
     alignItems: 'flex-end',
-    paddingRight: 8,
-    marginBottom: -8,
-    zIndex: 30,
+    paddingRight: 6,
+    marginBottom: -6,
+    zIndex: 35,
   },
   floatingCalibrateBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
   },
   calibrateIcon: {
     marginRight: 6,
   },
   floatingCalibrateText: {
-    color: '#334155',
     fontSize: 12,
     fontWeight: '700',
+    letterSpacing: 0.3,
+    backgroundColor: 'transparent',
   },
   dialContainer: {
-    marginVertical: 4,
+    marginVertical: 2,
   },
   debugCard: {
     width: '100%',
-    padding: 12,
-    borderRadius: 12,
+    padding: 14,
+    borderRadius: 14,
     borderWidth: 1,
     marginVertical: 10,
   },
   debugTitle: {
     fontSize: 12,
     fontWeight: '700',
-    marginBottom: 4,
+    marginBottom: 6,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    backgroundColor: 'transparent',
   },
   debugText: {
     fontSize: 12,
-    fontFamily: 'Courier',
+    fontFamily: 'System',
     marginTop: 2,
+    backgroundColor: 'transparent',
   },
 });
