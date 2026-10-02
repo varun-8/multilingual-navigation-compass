@@ -26,26 +26,27 @@ export const calculateTiltCompensatedHeading = (
   const ay = accel.y / normAccel;
   const az = accel.z / normAccel;
 
-  // Calculate Roll (phi) and Pitch (theta) in radians
-  // Roll: rotation around Y axis (-pi to pi)
-  // Pitch: rotation around X axis (-pi/2 to pi/2)
-  const roll = Math.atan2(ay, az);
-  const pitch = Math.atan2(-ax, Math.sqrt(ay * ay + az * az));
+  // Pitch (theta): tilt around X axis (forward/backward)
+  // Roll (phi): tilt around Y axis (left/right)
+  const pitch = Math.atan2(ay, Math.sqrt(ax * ax + az * az));
+  const roll = Math.atan2(-ax, az);
 
-  const cosRoll = Math.cos(roll);
-  const sinRoll = Math.sin(roll);
   const cosPitch = Math.cos(pitch);
   const sinPitch = Math.sin(pitch);
+  const cosRoll = Math.cos(roll);
+  const sinRoll = Math.sin(roll);
 
-  // Tilt-compensated magnetic vector components
-  const Xh = mag.x * cosPitch + mag.y * sinRoll * sinPitch + mag.z * cosRoll * sinPitch;
-  const Yh = mag.y * cosRoll - mag.z * sinRoll;
+  // Tilt-compensated magnetic vector projected onto horizontal plane
+  // Xh: forward horizontal component (along top of device)
+  // Yh: rightward horizontal component (along right of device)
+  const Xh = mag.x * sinRoll * sinPitch + mag.y * cosPitch - mag.z * cosRoll * sinPitch;
+  const Yh = mag.x * cosRoll + mag.z * sinRoll;
 
-  // Compute magnetic azimuth (heading)
+  // Compute magnetic azimuth in degrees (0 = North, 90 = East, 180 = South, 270 = West)
   let headingRad = Math.atan2(-Yh, Xh);
   let headingDeg = toDegrees(headingRad);
 
-  // Apply device orientation offset if needed
+  // Apply device orientation offset if landscape
   if (orientation === 'landscape') {
     headingDeg += 90;
   }
