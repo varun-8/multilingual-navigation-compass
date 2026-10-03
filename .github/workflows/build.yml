@@ -72,6 +72,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Initialize EAS Project
+        run: eas init --account varun2003 --non-interactive || true
+
       - name: Trigger Automated EAS Build
         run: |
           eas build \
