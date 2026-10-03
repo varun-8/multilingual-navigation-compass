@@ -1,0 +1,89 @@
+name: Automated Build & CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Target platform to build'
+        required: true
+        default: 'android'
+        type: choice
+        options:
+          - android
+          - all
+      profile:
+        description: 'Build profile (preview generates direct APK, production generates store AAB)'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: TypeScript & Lint Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript Check
+        run: npm run ts:check
+
+  build:
+    name: EAS Automated Build
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Trigger Automated EAS Build
+        run: |
+          eas build \
+            --platform ${{ github.event.inputs.platform || 'android' }} \
+            --profile ${{ github.event.inputs.profile || 'preview' }} \
+            --non-interactive
+
+      - name: Add Job Summary
+        if: always()
+        run: |
+          echo "## 📱 Automated Mobile Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Your cloud build was processed by Expo Application Services." >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform:** ${{ github.event.inputs.platform || 'android' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Profile:** ${{ github.event.inputs.profile || 'preview' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 📥 Download your standalone APK or scan the install QR code from your [Expo Dashboard](https://expo.dev)." >> $GITHUB_STEP_SUMMARY

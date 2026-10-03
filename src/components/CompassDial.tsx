@@ -26,6 +26,19 @@ interface CompassDialProps {
   nightVision?: boolean;
 }
 
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  topSightContainer: {
+    position: 'absolute',
+    zIndex: 30,
+    alignItems: 'center',
+  },
+});
+
 const CompassDialComponent: React.FC<CompassDialProps> = ({
   heading,
   pitch = 0,
@@ -385,7 +398,7 @@ const CompassDialComponent: React.FC<CompassDialProps> = ({
           ))}
         </G>
 
-        {/* 9. ULTRA-MODERN REAL-TIME CELESTIAL SUN POSITION INDICATOR */}
+        {/* 9. LUXURY SWISS-GRADE REAL-TIME CELESTIAL SUN TRACKER */}
         {showSunTracker && solarData && (
           <G key="sun-tracker-layer">
             {/* A. Golden Daytime Ecliptic Path Arc across sky */}
@@ -396,8 +409,8 @@ const CompassDialComponent: React.FC<CompassDialProps> = ({
                   d={daylightArcPath}
                   fill="none"
                   stroke="url(#eclipticArcGrad)"
-                  strokeWidth={5 * scale}
-                  opacity={0.22}
+                  strokeWidth={4 * scale}
+                  opacity={0.2}
                   strokeLinecap="round"
                 />
                 {/* Precision dashed ecliptic flight path */}
@@ -405,9 +418,9 @@ const CompassDialComponent: React.FC<CompassDialProps> = ({
                   d={daylightArcPath}
                   fill="none"
                   stroke="url(#eclipticArcGrad)"
-                  strokeWidth={1.8 * scale}
+                  strokeWidth={1.5 * scale}
                   strokeDasharray="4 3"
-                  opacity={0.85}
+                  opacity={0.8}
                   strokeLinecap="round"
                 />
               </G>
@@ -415,7 +428,7 @@ const CompassDialComponent: React.FC<CompassDialProps> = ({
 
             {/* B. Center-to-Sun High-Tech Laser Beam Vector */}
             {(() => {
-              const sunPt = getMarkerCoords(solarData.currentSunAzimuth, 20);
+              const sunPt = getMarkerCoords(solarData.currentSunAzimuth, 18);
               const innerRadius = 28 * scale;
               const startX = center + innerRadius * Math.cos(sunPt.rad);
               const startY = center + innerRadius * Math.sin(sunPt.rad);
@@ -430,8 +443,8 @@ const CompassDialComponent: React.FC<CompassDialProps> = ({
                     x2={sunPt.x}
                     y2={sunPt.y}
                     stroke={isDay ? '#FBBF24' : '#6366F1'}
-                    strokeWidth={5 * scale}
-                    opacity={isDay ? 0.16 : 0.08}
+                    strokeWidth={4 * scale}
+                    opacity={isDay ? 0.12 : 0.06}
                     strokeLinecap="round"
                   />
                   {/* Core Precision Laser Line */}
@@ -441,215 +454,141 @@ const CompassDialComponent: React.FC<CompassDialProps> = ({
                     x2={sunPt.x}
                     y2={sunPt.y}
                     stroke={isDay ? 'url(#sunLaserGrad)' : '#818CF8'}
-                    strokeWidth={1.8 * scale}
-                    strokeDasharray="5 3"
-                    opacity={isDay ? 0.95 : 0.6}
+                    strokeWidth={1.4 * scale}
+                    strokeDasharray="4 2"
+                    opacity={isDay ? 0.9 : 0.5}
                   />
-                  {/* Outer Bezel Solar Precision Alignment Notch Chevron */}
+                  {/* Outer Bezel Solar Precision Alignment Pip */}
                   {(() => {
-                    const rimX1 = center + (dialRadius - 1 * scale) * Math.cos(sunPt.rad);
-                    const rimY1 = center + (dialRadius - 1 * scale) * Math.sin(sunPt.rad);
-                    const rimX2 = center + (dialRadius + 9 * scale) * Math.cos(sunPt.rad);
-                    const rimY2 = center + (dialRadius + 9 * scale) * Math.sin(sunPt.rad);
+                    const rimX = center + (dialRadius + 7 * scale) * Math.cos(sunPt.rad);
+                    const rimY = center + (dialRadius + 7 * scale) * Math.sin(sunPt.rad);
                     return (
-                      <G>
-                        <Line
-                          x1={rimX1}
-                          y1={rimY1}
-                          x2={rimX2}
-                          y2={rimY2}
-                          stroke={isDay ? '#FDE047' : '#A5B4FC'}
-                          strokeWidth={3 * scale}
-                          strokeLinecap="round"
-                        />
-                        <Circle
-                          cx={center + (dialRadius + 9 * scale) * Math.cos(sunPt.rad)}
-                          cy={center + (dialRadius + 9 * scale) * Math.sin(sunPt.rad)}
-                          r={2 * scale}
-                          fill={isDay ? '#F59E0B' : '#6366F1'}
-                        />
-                      </G>
+                      <Circle
+                        cx={rimX}
+                        cy={rimY}
+                        r={2.5 * scale}
+                        fill={isDay ? '#FDE047' : '#A5B4FC'}
+                        stroke={isDay ? '#92400E' : '#312E81'}
+                        strokeWidth={1}
+                      />
                     );
                   })()}
                 </G>
               );
             })()}
 
-            {/* C. Modern Sunrise Horizon Glyph (🌅 Dawn Anchor) */}
+            {/* C. Modern Sunrise Horizon Glyph (🌅 Dawn Hallmark) */}
             {(() => {
-              const pt = getMarkerCoords(solarData.sunriseAzimuth, 22);
+              const pt = getMarkerCoords(solarData.sunriseAzimuth, 20);
               return (
                 <G key="sunrise-anchor">
-                  {/* Subtle Horizon Line */}
+                  {/* Dawn Horizon Tick */}
                   <Line
-                    x1={pt.x - 8 * scale}
-                    y1={pt.y + 1 * scale}
-                    x2={pt.x + 8 * scale}
-                    y2={pt.y + 1 * scale}
+                    x1={pt.x - 5 * scale}
+                    y1={pt.y}
+                    x2={pt.x + 5 * scale}
+                    y2={pt.y}
                     stroke="#F59E0B"
                     strokeWidth={1.5 * scale}
                     strokeLinecap="round"
-                    opacity={0.8}
+                    opacity={0.9}
                   />
-                  {/* Ascending Dawn Disc */}
-                  <Circle cx={pt.x} cy={pt.y - 1.5 * scale} r={4.5 * scale} fill="#F59E0B" stroke="#FFFBEB" strokeWidth={1} />
-                  {/* Rising Rays */}
-                  <Line x1={pt.x} y1={pt.y - 6.5 * scale} x2={pt.x} y2={pt.y - 9 * scale} stroke="#FDE047" strokeWidth={1.2 * scale} strokeLinecap="round" />
-                  <Line x1={pt.x - 4.5 * scale} y1={pt.y - 5 * scale} x2={pt.x - 6.5 * scale} y2={pt.y - 7 * scale} stroke="#FDE047" strokeWidth={1.2 * scale} strokeLinecap="round" />
-                  <Line x1={pt.x + 4.5 * scale} y1={pt.y - 5 * scale} x2={pt.x + 6.5 * scale} y2={pt.y - 7 * scale} stroke="#FDE047" strokeWidth={1.2 * scale} strokeLinecap="round" />
-
-                  {/* Azimuth Callout Tag */}
-                  <SvgText
-                    x={pt.x}
-                    y={pt.y + 11 * scale}
-                    fill="#F59E0B"
-                    fontSize={Math.max(6, 7.5 * scale)}
-                    fontWeight="800"
-                    textAnchor="middle"
-                  >
-                    RISE {solarData.sunriseAzimuth}°
-                  </SvgText>
+                  {/* Ascending Solar Half-Disc */}
+                  <Circle cx={pt.x} cy={pt.y - 1.5 * scale} r={3.5 * scale} fill="#F59E0B" stroke="#FFFBEB" strokeWidth={0.8} />
+                  {/* Counter-Rotated RISE Micro-Tag (Always Level & Upright!) */}
+                  <G transform={`rotate(${heading}, ${pt.x}, ${pt.y}) translate(0, ${10 * scale})`}>
+                    <SvgText
+                      x={0}
+                      y={0}
+                      fill="#F59E0B"
+                      fontSize={Math.max(6, 7 * scale)}
+                      fontWeight="800"
+                      fontFamily="System"
+                      letterSpacing={0.5}
+                      textAnchor="middle"
+                    >
+                      ▲ RISE
+                    </SvgText>
+                  </G>
                 </G>
               );
             })()}
 
-            {/* D. Modern Sunset Horizon Glyph (🌇 Dusk Anchor) */}
+            {/* D. Modern Sunset Horizon Glyph (🌇 Dusk Hallmark) */}
             {(() => {
-              const pt = getMarkerCoords(solarData.sunsetAzimuth, 22);
+              const pt = getMarkerCoords(solarData.sunsetAzimuth, 20);
               return (
                 <G key="sunset-anchor">
-                  {/* Horizon Line */}
+                  {/* Dusk Horizon Tick */}
                   <Line
-                    x1={pt.x - 8 * scale}
-                    y1={pt.y + 1 * scale}
-                    x2={pt.x + 8 * scale}
-                    y2={pt.y + 1 * scale}
-                    stroke="#F43F5E"
+                    x1={pt.x - 5 * scale}
+                    y1={pt.y}
+                    x2={pt.x + 5 * scale}
+                    y2={pt.y}
+                    stroke="#EC4899"
                     strokeWidth={1.5 * scale}
                     strokeLinecap="round"
-                    opacity={0.8}
+                    opacity={0.9}
                   />
-                  {/* Sinking Sunset Disc */}
-                  <Circle cx={pt.x} cy={pt.y + 1 * scale} r={4.5 * scale} fill="#F43F5E" stroke="#FFF1F2" strokeWidth={1} />
-                  {/* Dusk Glow Rays */}
-                  <Line x1={pt.x} y1={pt.y - 4 * scale} x2={pt.x} y2={pt.y - 6.5 * scale} stroke="#FB7185" strokeWidth={1.2 * scale} strokeLinecap="round" />
-                  <Line x1={pt.x - 4.5 * scale} y1={pt.y - 3 * scale} x2={pt.x - 6.5 * scale} y2={pt.y - 4.8 * scale} stroke="#FB7185" strokeWidth={1.2 * scale} strokeLinecap="round" />
-                  <Line x1={pt.x + 4.5 * scale} y1={pt.y - 3 * scale} x2={pt.x + 6.5 * scale} y2={pt.y - 4.8 * scale} stroke="#FB7185" strokeWidth={1.2 * scale} strokeLinecap="round" />
-
-                  {/* Azimuth Callout Tag */}
-                  <SvgText
-                    x={pt.x}
-                    y={pt.y + 11 * scale}
-                    fill="#F43F5E"
-                    fontSize={Math.max(6, 7.5 * scale)}
-                    fontWeight="800"
-                    textAnchor="middle"
-                  >
-                    SET {solarData.sunsetAzimuth}°
-                  </SvgText>
+                  {/* Setting Solar Half-Disc */}
+                  <Circle cx={pt.x} cy={pt.y + 1.5 * scale} r={3.5 * scale} fill="#EC4899" stroke="#FFF1F2" strokeWidth={0.8} />
+                  {/* Counter-Rotated SET Micro-Tag (Always Level & Upright!) */}
+                  <G transform={`rotate(${heading}, ${pt.x}, ${pt.y}) translate(0, ${10 * scale})`}>
+                    <SvgText
+                      x={0}
+                      y={0}
+                      fill="#EC4899"
+                      fontSize={Math.max(6, 7 * scale)}
+                      fontWeight="800"
+                      fontFamily="System"
+                      letterSpacing={0.5}
+                      textAnchor="middle"
+                    >
+                      ▼ SET
+                    </SvgText>
+                  </G>
                 </G>
               );
             })()}
 
-            {/* E. BREATHTAKING VOLUMETRIC 3D RADIANT SUNBURST ORB */}
+            {/* E. BREATHTAKING VOLUMETRIC CELESTIAL SUN ORB */}
             {(() => {
               const pt = getMarkerCoords(solarData.currentSunAzimuth, 18);
               const isDay = solarData.isDaytime;
-              const rCorona = 26 * scale;
-              const rCore = 6.5 * scale;
-              const rReticle = 16 * scale;
-              const rFlareMajor = 15 * scale;
-              const rFlareMinor = 10 * scale;
+              const rCorona = 20 * scale;
+              const rCore = 5.5 * scale;
+              const rHalo = 10 * scale;
 
               if (isDay) {
                 return (
                   <G key="live-sun-graphic">
-                    {/* Layer 1: Multi-Tier Volumetric Atmospheric Corona Glow */}
+                    {/* Layer 1: Atmospheric Corona Glow */}
                     <Circle cx={pt.x} cy={pt.y} r={rCorona} fill="url(#sunCoronaVolumetric)" />
 
-                    {/* Layer 2: Precision Avionics Targeting Reticle Ring */}
+                    {/* Layer 2: Delicate Solar Orbit Halo Ring */}
                     <Circle
                       cx={pt.x}
                       cy={pt.y}
-                      r={rReticle}
+                      r={rHalo}
                       fill="none"
                       stroke="#FDE047"
                       strokeWidth={1}
-                      strokeDasharray="3 3"
+                      strokeDasharray="2 2"
                       opacity={0.65}
                     />
 
-                    {/* Reticle Micro Crosshairs (Top, Bottom, Left, Right) */}
-                    <Line x1={pt.x} y1={pt.y - rReticle - 3 * scale} x2={pt.x} y2={pt.y - rReticle + 2 * scale} stroke="#FDE047" strokeWidth={1.2 * scale} opacity={0.8} />
-                    <Line x1={pt.x} y1={pt.y + rReticle - 2 * scale} x2={pt.x} y2={pt.y + rReticle + 3 * scale} stroke="#FDE047" strokeWidth={1.2 * scale} opacity={0.8} />
-                    <Line x1={pt.x - rReticle - 3 * scale} y1={pt.y} x2={pt.x - rReticle + 2 * scale} y2={pt.y} stroke="#FDE047" strokeWidth={1.2 * scale} opacity={0.8} />
-                    <Line x1={pt.x + rReticle - 2 * scale} y1={pt.y} x2={pt.x + rReticle + 3 * scale} y2={pt.y} stroke="#FDE047" strokeWidth={1.2 * scale} opacity={0.8} />
-
-                    {/* Layer 3: 8-Point Faceted Diamond Starburst Rays */}
-                    <G opacity={0.92}>
-                      {/* Cardinal Diamond Flares */}
-                      {/* Top Spike */}
-                      <Polygon
-                        points={`${pt.x},${pt.y - rFlareMajor} ${pt.x + 2 * scale},${pt.y - 7.5 * scale} ${pt.x},${pt.y - 6 * scale} ${pt.x - 2 * scale},${pt.y - 7.5 * scale}`}
-                        fill="#FEF08A"
-                      />
-                      {/* Bottom Spike */}
-                      <Polygon
-                        points={`${pt.x},${pt.y + rFlareMajor} ${pt.x + 2 * scale},${pt.y + 7.5 * scale} ${pt.x},${pt.y + 6 * scale} ${pt.x - 2 * scale},${pt.y + 7.5 * scale}`}
-                        fill="#FEF08A"
-                      />
-                      {/* Left Spike */}
-                      <Polygon
-                        points={`${pt.x - rFlareMajor},${pt.y} ${pt.x - 7.5 * scale},${pt.y - 2 * scale} ${pt.x - 6 * scale},${pt.y} ${pt.x - 7.5 * scale},${pt.y + 2 * scale}`}
-                        fill="#FEF08A"
-                      />
-                      {/* Right Spike */}
-                      <Polygon
-                        points={`${pt.x + rFlareMajor},${pt.y} ${pt.x + 7.5 * scale},${pt.y - 2 * scale} ${pt.x + 6 * scale},${pt.y} ${pt.x + 7.5 * scale},${pt.y + 2 * scale}`}
-                        fill="#FEF08A"
-                      />
-
-                      {/* Diagonal Secondary Diamond Flares */}
-                      {(() => {
-                        const dOuter = rFlareMinor * 0.707;
-                        const dInner = 6 * scale * 0.707;
-                        const dMid = 7.5 * scale * 0.707;
-                        const perp = 1.3 * scale;
-                        return (
-                          <G opacity={0.85}>
-                            {/* Top-Right */}
-                            <Polygon
-                              points={`${pt.x + dOuter},${pt.y - dOuter} ${pt.x + dMid - perp},${pt.y - dMid - perp} ${pt.x + dInner},${pt.y - dInner} ${pt.x + dMid + perp},${pt.y - dMid + perp}`}
-                              fill="#F59E0B"
-                            />
-                            {/* Top-Left */}
-                            <Polygon
-                              points={`${pt.x - dOuter},${pt.y - dOuter} ${pt.x - dMid - perp},${pt.y - dMid + perp} ${pt.x - dInner},${pt.y - dInner} ${pt.x - dMid + perp},${pt.y - dMid - perp}`}
-                              fill="#F59E0B"
-                            />
-                            {/* Bottom-Right */}
-                            <Polygon
-                              points={`${pt.x + dOuter},${pt.y + dOuter} ${pt.x + dMid + perp},${pt.y + dMid - perp} ${pt.x + dInner},${pt.y + dInner} ${pt.x + dMid - perp},${pt.y + dMid + perp}`}
-                              fill="#F59E0B"
-                            />
-                            {/* Bottom-Left */}
-                            <Polygon
-                              points={`${pt.x - dOuter},${pt.y + dOuter} ${pt.x - dMid + perp},${pt.y + dMid + perp} ${pt.x - dInner},${pt.y + dInner} ${pt.x - dMid - perp},${pt.y + dMid - perp}`}
-                              fill="#F59E0B"
-                            />
-                          </G>
-                        );
-                      })()}
-                    </G>
+                    {/* Layer 3: 4 Delicate Astral Cross Glints */}
+                    <Line x1={pt.x} y1={pt.y - rCore - 3 * scale} x2={pt.x} y2={pt.y + rCore + 3 * scale} stroke="#FFFBEB" strokeWidth={1} strokeLinecap="round" opacity={0.85} />
+                    <Line x1={pt.x - rCore - 3 * scale} y1={pt.y} x2={pt.x + rCore + 3 * scale} y2={pt.y} stroke="#FFFBEB" strokeWidth={1} strokeLinecap="round" opacity={0.85} />
 
                     {/* Layer 4: Deep Gold Metallic Bezel Ring */}
                     <Circle
                       cx={pt.x}
                       cy={pt.y}
-                      r={rCore + 2 * scale}
+                      r={rCore + 1.8 * scale}
                       fill="#92400E"
                       stroke="#FEF08A"
-                      strokeWidth={1.2 * scale}
+                      strokeWidth={1 * scale}
                     />
 
                     {/* Layer 5: 3D Spherical Solar Plasma Core */}
@@ -660,102 +599,83 @@ const CompassDialComponent: React.FC<CompassDialProps> = ({
                       fill="url(#sunOrb3D)"
                     />
 
-                    {/* Layer 6: Dual Specular Glint Center */}
+                    {/* Layer 6: Specular Glint */}
                     <Circle
-                      cx={pt.x - 1.8 * scale}
-                      cy={pt.y - 1.8 * scale}
-                      r={2.2 * scale}
+                      cx={pt.x - 1.5 * scale}
+                      cy={pt.y - 1.5 * scale}
+                      r={1.8 * scale}
                       fill="#FFFFFF"
                       opacity={0.95}
                     />
-                    <Circle
-                      cx={pt.x - 2.2 * scale}
-                      cy={pt.y - 2.2 * scale}
-                      r={1 * scale}
-                      fill="#FFFFFF"
-                    />
 
-                    {/* Layer 7: Cyber-Aeronautical Floating Telemetry HUD Badge */}
-                    <G transform={`translate(${pt.x}, ${pt.y + 15 * scale})`}>
+                    {/* Layer 7: COUNTER-ROTATED TELEMETRY HUD BADGE (ALWAYS LEVEL & UPRIGHT!) */}
+                    <G transform={`rotate(${heading}, ${pt.x}, ${pt.y}) translate(0, ${15 * scale})`}>
                       <Rect
-                        x={-28 * scale}
-                        y={-2 * scale}
-                        width={56 * scale}
-                        height={14 * scale}
-                        rx={7 * scale}
-                        fill="#090D16F5"
+                        x={-19 * scale}
+                        y={-6 * scale}
+                        width={38 * scale}
+                        height={12 * scale}
+                        rx={6 * scale}
+                        fill="#050811F0"
                         stroke="#F59E0B"
-                        strokeWidth={1.2}
+                        strokeWidth={1}
                       />
-                      {/* Sun Icon dot inside badge */}
-                      <Circle cx={-19 * scale} cy={5 * scale} r={2.8 * scale} fill="#FDE047" stroke="#F59E0B" strokeWidth={0.8} />
                       <SvgText
-                        x={3 * scale}
-                        y={8.2 * scale}
+                        x={0}
+                        y={2.8 * scale}
                         fill="#FEF08A"
-                        fontSize={Math.max(7, 8.5 * scale)}
+                        fontSize={Math.max(7, 8 * scale)}
                         fontWeight="800"
                         fontFamily="System"
                         textAnchor="middle"
                       >
-                        +{solarData.currentSunElevation}° SUN
+                        +{solarData.currentSunElevation}°
                       </SvgText>
                     </G>
                   </G>
                 );
               } else {
-                // Nighttime Celestial Representation (Sun under horizon)
+                // Nighttime Moonlit Representation
                 return (
                   <G key="night-sun-graphic">
-                    <Circle cx={pt.x} cy={pt.y} r={20 * scale} fill="url(#sunNightCorona)" />
+                    <Circle cx={pt.x} cy={pt.y} r={16 * scale} fill="url(#sunNightCorona)" />
                     <Circle
                       cx={pt.x}
                       cy={pt.y}
-                      r={12 * scale}
+                      r={9 * scale}
                       fill="none"
                       stroke="#818CF8"
                       strokeWidth={1}
-                      strokeDasharray="2 3"
+                      strokeDasharray="2 2"
                       opacity={0.6}
                     />
-                    {/* 3D Moonlit Core Orb */}
-                    <Circle cx={pt.x} cy={pt.y} r={7.5 * scale} fill="url(#sunNightOrb)" stroke="#C7D2FE" strokeWidth={1 * scale} />
-                    {/* Twilight Silver Crescent Accent */}
+                    <Circle cx={pt.x} cy={pt.y} r={6 * scale} fill="url(#sunNightOrb)" stroke="#C7D2FE" strokeWidth={0.8 * scale} />
                     <Path
-                      d={`M ${pt.x - 2 * scale} ${pt.y - 4.5 * scale} A 4 4 0 0 0 ${pt.x - 2 * scale} ${pt.y + 4.5 * scale} A 5.5 5.5 0 0 1 ${pt.x - 2 * scale} ${pt.y - 4.5 * scale}`}
+                      d={`M ${pt.x - 1.5 * scale} ${pt.y - 3.5 * scale} A 3 3 0 0 0 ${pt.x - 1.5 * scale} ${pt.y + 3.5 * scale} A 4 4 0 0 1 ${pt.x - 1.5 * scale} ${pt.y - 3.5 * scale}`}
                       fill="#E0E7FF"
                     />
-                    {/* Micro Starlight Sparkle Diamond */}
-                    <Polygon
-                      points={`${pt.x + 3 * scale},${pt.y - 5 * scale} ${pt.x + 4 * scale},${pt.y - 4 * scale} ${pt.x + 3 * scale},${pt.y - 3 * scale} ${pt.x + 2 * scale},${pt.y - 4 * scale}`}
-                      fill="#FFFFFF"
-                      opacity={0.9}
-                    />
-
-                    {/* Night Telemetry HUD Badge */}
-                    <G transform={`translate(${pt.x}, ${pt.y + 15 * scale})`}>
+                    {/* Counter-Rotated Night Telemetry Badge (Always Level & Upright!) */}
+                    <G transform={`rotate(${heading}, ${pt.x}, ${pt.y}) translate(0, ${15 * scale})`}>
                       <Rect
-                        x={-28 * scale}
-                        y={-2 * scale}
-                        width={56 * scale}
-                        height={14 * scale}
-                        rx={7 * scale}
-                        fill="#090D16F5"
+                        x={-19 * scale}
+                        y={-6 * scale}
+                        width={38 * scale}
+                        height={12 * scale}
+                        rx={6 * scale}
+                        fill="#050811F0"
                         stroke="#6366F1"
-                        strokeWidth={1.2}
+                        strokeWidth={1}
                       />
-                      {/* Moon dot inside badge */}
-                      <Circle cx={-19 * scale} cy={5 * scale} r={2.8 * scale} fill="#818CF8" />
                       <SvgText
-                        x={3 * scale}
-                        y={8.2 * scale}
+                        x={0}
+                        y={2.8 * scale}
                         fill="#C7D2FE"
-                        fontSize={Math.max(7, 8.5 * scale)}
+                        fontSize={Math.max(7, 8 * scale)}
                         fontWeight="800"
                         fontFamily="System"
                         textAnchor="middle"
                       >
-                        {solarData.currentSunElevation}° NIGHT
+                        {solarData.currentSunElevation}°
                       </SvgText>
                     </G>
                   </G>
@@ -1008,16 +928,3 @@ const CompassDialComponent: React.FC<CompassDialProps> = ({
 };
 
 export const CompassDial = React.memo(CompassDialComponent);
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  topSightContainer: {
-    position: 'absolute',
-    zIndex: 30,
-    alignItems: 'center',
-  },
-});

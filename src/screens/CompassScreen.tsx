@@ -32,7 +32,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Compass'>;
 export const CompassScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { width } = useWindowDimensions();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { location, hasPermission, askPermission } = useLocation();
   const {
     compassData,
@@ -160,7 +160,7 @@ export const CompassScreen: React.FC = () => {
                 styles.floatingToggleBtn,
                 {
                   backgroundColor: showSunTracker
-                    ? (nightVision ? '#330000' : '#FEF3C7')
+                    ? (nightVision ? '#330000' : isDark ? '#78350F25' : '#FEF3C7')
                     : activeCardBg,
                   borderColor: showSunTracker
                     ? (nightVision ? '#FF3333' : '#F59E0B')
@@ -180,7 +180,7 @@ export const CompassScreen: React.FC = () => {
                   styles.floatingToggleText,
                   {
                     color: showSunTracker
-                      ? (nightVision ? '#FF4444' : '#B45309')
+                      ? (nightVision ? '#FF4444' : isDark ? '#FBBF24' : '#B45309')
                       : colors.textSecondary,
                   },
                 ]}

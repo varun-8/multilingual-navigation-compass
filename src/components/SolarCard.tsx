@@ -18,6 +18,103 @@ import { typography } from '../theme/typography';
 import { t } from '../i18n';
 import { Sun, Sunset, Sunrise, Compass } from 'lucide-react-native';
 
+const styles = StyleSheet.create({
+  card: {
+    width: '100%',
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 16,
+    marginVertical: 8,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  titleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  icon: {
+    marginRight: 8,
+  },
+  title: {
+    fontSize: 15,
+    fontFamily: typography.fontFamily.headingBold,
+    backgroundColor: 'transparent',
+  },
+  phaseBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  phaseDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 6,
+  },
+  phaseText: {
+    fontSize: 11,
+    fontFamily: typography.fontFamily.bold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    backgroundColor: 'transparent',
+  },
+  skyArcContainer: {
+    width: '100%',
+    height: 84,
+    marginVertical: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  grid: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: 6,
+  },
+  gridItem: {
+    flex: 1,
+    minWidth: 0,
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    backgroundColor: 'transparent',
+  },
+  itemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  label: {
+    fontSize: 10,
+    fontFamily: typography.fontFamily.bold,
+    marginLeft: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
+    backgroundColor: 'transparent',
+  },
+  timeVal: {
+    fontSize: 14,
+    fontFamily: typography.fontFamily.headingBold,
+    fontVariant: ['tabular-nums'],
+    marginTop: 2,
+    backgroundColor: 'transparent',
+  },
+  azimuthVal: {
+    fontSize: 10,
+    fontFamily: typography.fontFamily.regular,
+    marginTop: 2,
+    backgroundColor: 'transparent',
+  },
+});
+
 interface SolarCardProps {
   solarData: SolarData | null;
 }
@@ -25,31 +122,10 @@ interface SolarCardProps {
 const SolarCardComponent: React.FC<SolarCardProps> = ({ solarData }) => {
   const { colors, isDark } = useTheme();
 
-  if (!solarData) return null;
-
-  const getPhaseBadge = () => {
-    switch (solarData.phase) {
-      case 'dawn':
-        return { text: t('phase_dawn'), color: '#38BDF8' };
-      case 'sunrise':
-        return { text: t('sunrise'), color: '#F59E0B' };
-      case 'day':
-        return { text: t('phase_day'), color: '#FBBF24' };
-      case 'golden_hour':
-        return { text: t('phase_golden_hour'), color: '#F97316' };
-      case 'sunset':
-        return { text: t('sunset'), color: '#EC4899' };
-      case 'dusk':
-        return { text: t('phase_dusk'), color: '#8B5CF6' };
-      default:
-        return { text: t('phase_night'), color: '#64748B' };
-    }
-  };
-
-  const phaseInfo = getPhaseBadge();
-
-  // Sky Arc Coordinate Calculations (viewBox: 0 0 320 84)
+  // Sky Arc Coordinate Calculations - MUST be called unconditionally before any early return!
   const skyArcMetrics = useMemo(() => {
+    if (!solarData) return null;
+
     const horizonY = 56;
     const startX = 36;
     const endX = 284;
@@ -96,6 +172,31 @@ const SolarCardComponent: React.FC<SolarCardProps> = ({ solarData }) => {
       dayProgress: Math.max(0, Math.min(1, progress)),
     };
   }, [solarData]);
+
+  if (!solarData || !skyArcMetrics) {
+    return null;
+  }
+
+  const getPhaseBadge = () => {
+    switch (solarData.phase) {
+      case 'dawn':
+        return { text: t('phase_dawn'), color: '#38BDF8' };
+      case 'sunrise':
+        return { text: t('sunrise'), color: '#F59E0B' };
+      case 'day':
+        return { text: t('phase_day'), color: '#FBBF24' };
+      case 'golden_hour':
+        return { text: t('phase_golden_hour'), color: '#F97316' };
+      case 'sunset':
+        return { text: t('sunset'), color: '#EC4899' };
+      case 'dusk':
+        return { text: t('phase_dusk'), color: '#8B5CF6' };
+      default:
+        return { text: t('phase_night'), color: '#64748B' };
+    }
+  };
+
+  const phaseInfo = getPhaseBadge();
 
   return (
     <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
@@ -377,100 +478,3 @@ const SolarCardComponent: React.FC<SolarCardProps> = ({ solarData }) => {
 };
 
 export const SolarCard = React.memo(SolarCardComponent);
-
-const styles = StyleSheet.create({
-  card: {
-    width: '100%',
-    borderRadius: 18,
-    borderWidth: 1,
-    padding: 16,
-    marginVertical: 8,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  titleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  icon: {
-    marginRight: 8,
-  },
-  title: {
-    fontSize: 15,
-    fontFamily: typography.fontFamily.headingBold,
-    backgroundColor: 'transparent',
-  },
-  phaseBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  phaseDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 6,
-  },
-  phaseText: {
-    fontSize: 11,
-    fontFamily: typography.fontFamily.bold,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    backgroundColor: 'transparent',
-  },
-  skyArcContainer: {
-    width: '100%',
-    height: 84,
-    marginVertical: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  grid: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    justifyContent: 'space-between',
-    gap: 8,
-    marginTop: 6,
-  },
-  gridItem: {
-    flex: 1,
-    minWidth: 0,
-    padding: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    backgroundColor: 'transparent',
-  },
-  itemHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  label: {
-    fontSize: 10,
-    fontFamily: typography.fontFamily.bold,
-    marginLeft: 4,
-    textTransform: 'uppercase',
-    letterSpacing: 0.3,
-    backgroundColor: 'transparent',
-  },
-  timeVal: {
-    fontSize: 14,
-    fontFamily: typography.fontFamily.headingBold,
-    fontVariant: ['tabular-nums'],
-    marginTop: 2,
-    backgroundColor: 'transparent',
-  },
-  azimuthVal: {
-    fontSize: 10,
-    fontFamily: typography.fontFamily.regular,
-    marginTop: 2,
-    backgroundColor: 'transparent',
-  },
-});
