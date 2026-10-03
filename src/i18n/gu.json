@@ -86,5 +86,21 @@
   "request_permission": "પરવાનગી આપો",
   "continue": "ચાલુ રાખો",
   "close": "બંધ કરો",
-  "back": "પાછા જાઓ"
+  "back": "પાછા જાઓ",
+  "solar_cycle": "સૂર્ય ચક્ર",
+  "sunrise": "સૂર્યોદય",
+  "sunset": "સૂર્યાસ્ત",
+  "sun_azimuth": "સૂર્ય દિગંશ",
+  "elevation": "ઊંચાઈ ખૂણો",
+  "below_horizon": "ક્ષિતિજ નીચે",
+  "azimuth": "દિગંશ",
+  "phase_dawn": "પરોઢ",
+  "phase_day": "દિવસ",
+  "phase_golden_hour": "ગોલ્ડન અવર",
+  "phase_dusk": "સંધ્યાકાળ",
+  "phase_night": "રાત્રિ",
+  "sun_tracker": "સૂર્ય ટ્રેકર",
+  "solar_tracker_on": "સૂર્ય ટ્રેકર: ચાલુ",
+  "solar_tracker_off": "સૂર્ય ટ્રેકર: બંધ",
+  "solar_position": "સૂર્યની સ્થિતિ"
 }

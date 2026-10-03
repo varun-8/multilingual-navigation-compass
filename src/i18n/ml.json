@@ -86,5 +86,21 @@
   "request_permission": "അനുമതി ചോദിക്കുക",
   "continue": "തുടരുക",
   "close": "അടയ്ക്കുക",
-  "back": "തിരികെ"
+  "back": "തിരികെ",
+  "solar_cycle": "സൂര്യ ചക്രം",
+  "sunrise": "സൂര്യോദയം",
+  "sunset": "സൂര്യാസ്തമയം",
+  "sun_azimuth": "സൂര്യ കോൺ",
+  "elevation": "ഉയര കോൺ",
+  "below_horizon": "ചക്രവാളത്തിന് താഴെ",
+  "azimuth": "കോൺ",
+  "phase_dawn": "പുലരി",
+  "phase_day": "പകൽ",
+  "phase_golden_hour": "സുവർണ്ണ സമയം",
+  "phase_dusk": "സന്ധ്യ",
+  "phase_night": "രാത്രി",
+  "sun_tracker": "സൂര്യ ട്രാക്കർ",
+  "solar_tracker_on": "സൂര്യ ട്രാക്കർ: ഓൺ",
+  "solar_tracker_off": "സൂര്യ ട്രാക്കർ: ഓഫ്",
+  "solar_position": "സൂര്യന്റെ സ്ഥാനം"
 }

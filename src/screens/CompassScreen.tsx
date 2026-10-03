@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -14,32 +15,39 @@ import * as Haptics from 'expo-haptics';
 import { useCompass } from '../hooks/useCompass';
 import { useLocation } from '../hooks/useLocation';
 import { useTheme } from '../hooks/useTheme';
+import { typography } from '../theme/typography';
 import { t } from '../i18n';
 import { CompassDial } from '../components/CompassDial';
 import { HeadingDisplay } from '../components/HeadingDisplay';
 import { SensorStatus } from '../components/SensorStatus';
 import { LocationCard } from '../components/LocationCard';
+import { SolarCard } from '../components/SolarCard';
 import { HeadingLockBar } from '../components/HeadingLockBar';
 import { LanguageBottomSheet } from '../components/LanguageBottomSheet';
-import { Globe, Settings, RefreshCw } from 'lucide-react-native';
+import { Globe, Settings, RefreshCw, Eye, EyeOff, Sun } from 'lucide-react-native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Compass'>;
 
 export const CompassScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { colors, isDark } = useTheme();
+  const { width } = useWindowDimensions();
+  const { colors } = useTheme();
   const { location, hasPermission, askPermission } = useLocation();
   const {
     compassData,
     northReference,
+    nightVision,
+    toggleNightVision,
     lockState,
     toggleHeadingLock,
     headingDifference,
     debugMode,
-  } = useCompass(location?.declination || 0);
+    solarData,
+  } = useCompass(location?.latitude || 0, location?.longitude || 0, location?.declination || 0);
 
   const [langSheetVisible, setLangSheetVisible] = useState(false);
+  const [showSunTracker, setShowSunTracker] = useState(true);
 
   const handleOpenLanguage = () => {
     try {
@@ -62,43 +70,77 @@ export const CompassScreen: React.FC = () => {
     navigation.navigate('Calibration');
   };
 
+  const handleToggleSunTracker = () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (e) {}
+    setShowSunTracker((prev) => !prev);
+  };
+
+  const activeBg = nightVision ? '#090000' : colors.background;
+  const activeCardBg = nightVision ? '#140000' : colors.card;
+  const activeText = nightVision ? '#FF4444' : colors.textPrimary;
+  const activeBorder = nightVision ? '#330000' : colors.cardBorder;
+
+  const isCompact = width < 360;
+
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colors.statusBar} />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: activeBg }]}>
+      <StatusBar barStyle={nightVision ? 'light-content' : colors.statusBar} />
 
       {/* Main Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingHorizontal: isCompact ? 14 : 20 }]}>
         <View style={styles.headerLeft}>
-          <Text style={[styles.appTitle, { color: colors.textPrimary }]}>
+          <Text style={[styles.appTitle, { color: activeText, fontSize: isCompact ? 20 : 24 }]}>
             {t('compass')}
           </Text>
         </View>
 
         <View style={styles.headerRight}>
+          {/* Night Vision Mode Toggle */}
+          <TouchableOpacity
+            style={[
+              styles.iconButton,
+              {
+                backgroundColor: nightVision ? '#2A0000' : colors.card,
+                borderColor: nightVision ? '#FF0000' : colors.cardBorder,
+              },
+            ]}
+            onPress={toggleNightVision}
+            accessibilityLabel="Night Vision Mode"
+            activeOpacity={0.7}
+          >
+            {nightVision ? (
+              <EyeOff size={18} color="#FF3333" />
+            ) : (
+              <Eye size={18} color={colors.textPrimary} />
+            )}
+          </TouchableOpacity>
+
           {/* Language Globe Button */}
           <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
+            style={[styles.iconButton, { backgroundColor: activeCardBg, borderColor: activeBorder }]}
             onPress={handleOpenLanguage}
             accessibilityLabel={t('select_language')}
             activeOpacity={0.7}
           >
-            <Globe size={19} color={colors.textPrimary} />
+            <Globe size={18} color={activeText} />
           </TouchableOpacity>
 
           {/* Settings Button */}
           <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}
+            style={[styles.iconButton, { backgroundColor: activeCardBg, borderColor: activeBorder }]}
             onPress={handleOpenSettings}
             accessibilityLabel={t('settings')}
             activeOpacity={0.7}
           >
-            <Settings size={19} color={colors.textPrimary} />
+            <Settings size={18} color={activeText} />
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingHorizontal: isCompact ? 12 : 18 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Sensor Status / Calibration Warning */}
@@ -110,36 +152,80 @@ export const CompassScreen: React.FC = () => {
 
         {/* Compass Physical Interaction Area */}
         <View style={styles.compassSection}>
-          {/* Floating Calibrate Button (Top Right matching modern model) */}
-          <View style={styles.calibrateButtonWrapper}>
+          {/* Floating Action Controls (Sun Position Toggle + Calibrate Button) */}
+          <View style={styles.controlsRow}>
+            {/* Sun Position On/Off Interactive Toggle */}
+            <TouchableOpacity
+              style={[
+                styles.floatingToggleBtn,
+                {
+                  backgroundColor: showSunTracker
+                    ? (nightVision ? '#330000' : '#FEF3C7')
+                    : activeCardBg,
+                  borderColor: showSunTracker
+                    ? (nightVision ? '#FF3333' : '#F59E0B')
+                    : activeBorder,
+                },
+              ]}
+              onPress={handleToggleSunTracker}
+              activeOpacity={0.8}
+            >
+              <Sun
+                size={13}
+                color={showSunTracker ? '#F59E0B' : colors.textMuted}
+                style={styles.toggleIcon}
+              />
+              <Text
+                style={[
+                  styles.floatingToggleText,
+                  {
+                    color: showSunTracker
+                      ? (nightVision ? '#FF4444' : '#B45309')
+                      : colors.textSecondary,
+                  },
+                ]}
+                numberOfLines={1}
+              >
+                {showSunTracker ? t('solar_tracker_on') : t('solar_tracker_off')}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Calibrate Button */}
             <TouchableOpacity
               style={[
                 styles.floatingCalibrateBtn,
                 {
-                  backgroundColor: colors.card,
-                  borderColor: colors.cardBorder,
+                  backgroundColor: activeCardBg,
+                  borderColor: activeBorder,
                 },
               ]}
               onPress={handleOpenCalibration}
               activeOpacity={0.8}
             >
-              <RefreshCw size={12} color={colors.accent} style={styles.calibrateIcon} />
-              <Text style={[styles.floatingCalibrateText, { color: colors.textPrimary }]}>
+              <RefreshCw
+                size={12}
+                color={nightVision ? '#FF3333' : colors.accent}
+                style={styles.calibrateIcon}
+              />
+              <Text style={[styles.floatingCalibrateText, { color: activeText }]} numberOfLines={1}>
                 {t('calibrate')}
               </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Rotating Vector Compass Dial matching modern high-tech model */}
+          {/* Rotating Vector Compass Dial with Enhanced Sun Position Graphic */}
           <View style={styles.dialContainer}>
             <CompassDial
               heading={compassData.heading}
               pitch={compassData.pitch}
               roll={compassData.roll}
+              solarData={solarData}
+              showSunTracker={showSunTracker}
+              nightVision={nightVision}
             />
           </View>
 
-          {/* Primary Heading Readout with clean typography (no text bg) */}
+          {/* Primary Heading Readout */}
           <HeadingDisplay
             heading={compassData.heading}
             northReference={northReference}
@@ -156,9 +242,12 @@ export const CompassScreen: React.FC = () => {
           onToggleLock={toggleHeadingLock}
         />
 
+        {/* Real-time Astronomical Sunrise & Sunset Solar Cycle Card */}
+        <SolarCard solarData={solarData} />
+
         {/* Debug Diagnostics Panel (Enabled via Developer Settings) */}
         {debugMode && (
-          <View style={[styles.debugCard, { backgroundColor: colors.card, borderColor: colors.warning }]}>
+          <View style={[styles.debugCard, { backgroundColor: activeCardBg, borderColor: colors.warning }]}>
             <Text style={[styles.debugTitle, { color: colors.warning }]}>
               ⚡ {t('debug_info')}
             </Text>
@@ -196,7 +285,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
     paddingVertical: 12,
   },
   headerLeft: {
@@ -204,8 +292,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   appTitle: {
-    fontSize: 24,
-    fontWeight: '800',
+    fontFamily: typography.fontFamily.headingExtraBold,
     letterSpacing: -0.5,
     backgroundColor: 'transparent',
   },
@@ -214,32 +301,57 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 10,
+    marginLeft: 6,
   },
   scrollContent: {
-    paddingHorizontal: 20,
     paddingBottom: 40,
     alignItems: 'center',
   },
   compassSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 8,
+    marginVertical: 4,
     width: '100%',
     position: 'relative',
   },
-  calibrateButtonWrapper: {
+  controlsRow: {
     width: '100%',
-    alignItems: 'flex-end',
-    paddingRight: 6,
-    marginBottom: -6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 2,
+    marginBottom: -4,
     zIndex: 35,
+    gap: 8,
+  },
+  floatingToggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 2,
+    flexShrink: 1,
+  },
+  toggleIcon: {
+    marginRight: 5,
+  },
+  floatingToggleText: {
+    fontSize: 11,
+    fontFamily: typography.fontFamily.bold,
+    letterSpacing: 0.2,
+    backgroundColor: 'transparent',
   },
   floatingCalibrateBtn: {
     flexDirection: 'row',
@@ -255,12 +367,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   calibrateIcon: {
-    marginRight: 6,
+    marginRight: 5,
   },
   floatingCalibrateText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.3,
+    fontSize: 11,
+    fontFamily: typography.fontFamily.bold,
+    letterSpacing: 0.2,
     backgroundColor: 'transparent',
   },
   dialContainer: {
@@ -275,7 +387,7 @@ const styles = StyleSheet.create({
   },
   debugTitle: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.bold,
     marginBottom: 6,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -283,7 +395,7 @@ const styles = StyleSheet.create({
   },
   debugText: {
     fontSize: 12,
-    fontFamily: 'System',
+    fontFamily: typography.fontFamily.monospace,
     marginTop: 2,
     backgroundColor: 'transparent',
   },

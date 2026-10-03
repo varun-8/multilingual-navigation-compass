@@ -86,5 +86,21 @@
   "request_permission": "परवानगी मागा",
   "continue": "पुढे चला",
   "close": "बंद करा",
-  "back": "मागे"
+  "back": "मागे",
+  "solar_cycle": "सूर्य चक्र",
+  "sunrise": "सूर्योदय",
+  "sunset": "सूर्यास्त",
+  "sun_azimuth": "सूर्य दिगंश",
+  "elevation": "उन्नती कोन",
+  "below_horizon": "क्षितिजाखाली",
+  "azimuth": "दिगंश",
+  "phase_dawn": "पहाट",
+  "phase_day": "दिवसाची वेळ",
+  "phase_golden_hour": "सुवर्ण वेळ",
+  "phase_dusk": "सायंकाळ",
+  "phase_night": "रात्र",
+  "sun_tracker": "सूर्य ट्रॅकर",
+  "solar_tracker_on": "सूर्य ट्रॅकर: चालू",
+  "solar_tracker_off": "सूर्य ट्रॅकर: बंद",
+  "solar_position": "सूर्याची स्थिती"
 }

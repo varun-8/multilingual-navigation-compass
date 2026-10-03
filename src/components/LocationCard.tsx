@@ -4,6 +4,7 @@ import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { LocationData } from '../types/compass';
 import { useTheme } from '../hooks/useTheme';
+import { typography } from '../theme/typography';
 import { t } from '../i18n';
 import { MapPin, Copy, Share2 } from 'lucide-react-native';
 
@@ -13,7 +14,7 @@ interface LocationCardProps {
   onRequestPermission: () => void;
 }
 
-export const LocationCard: React.FC<LocationCardProps> = ({
+const LocationCardComponent: React.FC<LocationCardProps> = ({
   location,
   hasPermission,
   onRequestPermission,
@@ -152,13 +153,15 @@ export const LocationCard: React.FC<LocationCardProps> = ({
   );
 };
 
+export const LocationCard = React.memo(LocationCardComponent);
+
 const styles = StyleSheet.create({
   card: {
     width: '100%',
     borderRadius: 18,
     borderWidth: 1,
     padding: 16,
-    marginVertical: 10,
+    marginVertical: 8,
   },
   headerRow: {
     flexDirection: 'row',
@@ -175,7 +178,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.headingBold,
     backgroundColor: 'transparent',
   },
   actionGroup: {
@@ -193,7 +196,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontFamily: typography.fontFamily.bold,
     marginLeft: 4,
     backgroundColor: 'transparent',
   },
@@ -210,6 +213,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 13,
+    fontFamily: typography.fontFamily.regular,
     textAlign: 'center',
     marginBottom: 10,
     lineHeight: 18,
@@ -223,7 +227,7 @@ const styles = StyleSheet.create({
   requestBtnText: {
     color: '#FFFFFF',
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.bold,
     backgroundColor: 'transparent',
   },
   grid: {
@@ -241,7 +245,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 10,
-    fontWeight: '800',
+    fontFamily: typography.fontFamily.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 4,
@@ -249,7 +253,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 15,
-    fontWeight: '800',
+    fontFamily: typography.fontFamily.headingBold,
     fontVariant: ['tabular-nums'],
     letterSpacing: -0.2,
     backgroundColor: 'transparent',

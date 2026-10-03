@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { HeadingLockState } from '../types/compass';
 import { useTheme } from '../hooks/useTheme';
+import { typography } from '../theme/typography';
 import { t } from '../i18n';
 import { Lock, Unlock } from 'lucide-react-native';
 
@@ -13,7 +14,7 @@ interface HeadingLockBarProps {
   onToggleLock: () => void;
 }
 
-export const HeadingLockBar: React.FC<HeadingLockBarProps> = ({
+const HeadingLockBarComponent: React.FC<HeadingLockBarProps> = ({
   heading,
   lockState,
   difference,
@@ -105,6 +106,8 @@ export const HeadingLockBar: React.FC<HeadingLockBarProps> = ({
   );
 };
 
+export const HeadingLockBar = React.memo(HeadingLockBarComponent);
+
 const styles = StyleSheet.create({
   container: {
     width: '100%',
@@ -129,7 +132,7 @@ const styles = StyleSheet.create({
   },
   lockButtonText: {
     fontSize: 13,
-    fontWeight: '800',
+    fontFamily: typography.fontFamily.bold,
     letterSpacing: 0.6,
     textTransform: 'uppercase',
     backgroundColor: 'transparent',
@@ -154,14 +157,14 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 10,
-    fontWeight: '800',
+    fontFamily: typography.fontFamily.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     backgroundColor: 'transparent',
   },
   infoVal: {
     fontSize: 18,
-    fontWeight: '900',
+    fontFamily: typography.fontFamily.headingBold,
     marginTop: 3,
     fontVariant: ['tabular-nums'],
     letterSpacing: -0.5,

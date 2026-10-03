@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
+import { typography } from '../theme/typography';
 import {
   getDirectionFromHeading,
   getLocalizedCardinalCode,
@@ -16,12 +17,13 @@ interface HeadingDisplayProps {
   roll?: number;
 }
 
-export const HeadingDisplay: React.FC<HeadingDisplayProps> = ({
+const HeadingDisplayComponent: React.FC<HeadingDisplayProps> = ({
   heading,
   northReference,
   pitch = 0,
   roll = 0,
 }) => {
+  const { width } = useWindowDimensions();
   const { colors } = useTheme();
   const dirInfo = getDirectionFromHeading(heading);
   const localizedCode = getLocalizedCardinalCode(dirInfo.code);
@@ -32,38 +34,52 @@ export const HeadingDisplay: React.FC<HeadingDisplayProps> = ({
 
   const isNorth = dirInfo.code === 'N';
 
+  const isCompact = width < 360;
+
   return (
     <View style={styles.container}>
       {/* Primary Numerical Degree Display */}
       <View style={styles.degreeRow}>
         <Text
-          style={[styles.degreeText, { color: colors.textPrimary }]}
+          style={[
+            styles.degreeText,
+            { color: colors.textPrimary, fontSize: isCompact ? 56 : 70 },
+          ]}
           numberOfLines={1}
+          adjustsFontSizeToFit
         >
           {Math.round(heading)}
         </Text>
         <Text
           style={[
             styles.degreeSymbol,
-            { color: isNorth ? colors.northAccent : colors.accent },
+            { color: isNorth ? colors.northAccent : colors.accent, fontSize: isCompact ? 28 : 34 },
           ]}
         >
           °
         </Text>
       </View>
 
-      {/* Direction Name & Code - Clean, Premium Typography without boxy backgrounds */}
+      {/* Direction Name & Code - Clean, Premium Typography adapting to all languages */}
       <View style={styles.directionRow}>
         <Text
           style={[
             styles.cardinalCodeText,
-            { color: isNorth ? colors.northAccent : colors.accent },
+            { color: isNorth ? colors.northAccent : colors.accent, fontSize: isCompact ? 18 : 22 },
           ]}
+          numberOfLines={1}
         >
           {localizedCode}
         </Text>
         <Text style={[styles.directionDot, { color: colors.textMuted }]}>•</Text>
-        <Text style={[styles.nameText, { color: colors.textPrimary }]}>
+        <Text
+          style={[
+            styles.nameText,
+            { color: colors.textPrimary, fontSize: isCompact ? 18 : 22 },
+          ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
           {localizedName}
         </Text>
       </View>
@@ -80,7 +96,7 @@ export const HeadingDisplay: React.FC<HeadingDisplayProps> = ({
             },
           ]}
         >
-          <Text style={[styles.pillText, { color: colors.accent }]}>
+          <Text style={[styles.pillText, { color: colors.accent }]} numberOfLines={1}>
             {northReference === 'true' ? t('true_north') : t('magnetic_north')}
           </Text>
         </View>
@@ -106,6 +122,7 @@ export const HeadingDisplay: React.FC<HeadingDisplayProps> = ({
               styles.pillText,
               { color: isLevel ? colors.success : colors.warning },
             ]}
+            numberOfLines={1}
           >
             {isLevel ? '0° LEVEL' : `${Math.round(totalTilt)}° TILT`}
           </Text>
@@ -115,10 +132,14 @@ export const HeadingDisplay: React.FC<HeadingDisplayProps> = ({
   );
 };
 
+export const HeadingDisplay = React.memo(HeadingDisplayComponent);
+
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    marginVertical: 10,
+    marginVertical: 8,
+    width: '100%',
+    paddingHorizontal: 16,
   },
   degreeRow: {
     flexDirection: 'row',
@@ -126,16 +147,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   degreeText: {
-    fontSize: 72,
-    fontWeight: '800',
+    fontFamily: typography.fontFamily.headingBlack,
     letterSpacing: -3,
     fontVariant: ['tabular-nums'],
     includeFontPadding: false,
     backgroundColor: 'transparent',
   },
   degreeSymbol: {
-    fontSize: 34,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.headingBold,
     marginTop: 6,
     marginLeft: 2,
     backgroundColor: 'transparent',
@@ -145,10 +164,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: -4,
+    maxWidth: '90%',
   },
   cardinalCodeText: {
-    fontSize: 22,
-    fontWeight: '900',
+    fontFamily: typography.fontFamily.headingBold,
     letterSpacing: 0.5,
     backgroundColor: 'transparent',
   },
@@ -158,15 +177,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   nameText: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.bold,
     letterSpacing: -0.3,
     backgroundColor: 'transparent',
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 12,
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginTop: 10,
+    gap: 6,
   },
   pill: {
     flexDirection: 'row',
@@ -175,12 +196,11 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 20,
     borderWidth: 1,
-    marginHorizontal: 5,
   },
   pillText: {
     fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
+    fontFamily: typography.fontFamily.bold,
+    letterSpacing: 0.6,
     textTransform: 'uppercase',
     backgroundColor: 'transparent',
   },

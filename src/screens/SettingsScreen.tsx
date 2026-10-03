@@ -16,16 +16,14 @@ import { useCompass } from '../hooks/useCompass';
 import { useLanguage } from '../hooks/useLanguage';
 import { useTheme } from '../hooks/useTheme';
 import { useLocation } from '../hooks/useLocation';
+import { typography } from '../theme/typography';
 import { getSupportedLanguagesList, t } from '../i18n';
 import { NorthReference, ThemeMode, SupportedLanguage } from '../types/compass';
 import {
   ChevronLeft,
   ChevronRight,
-  Compass,
-  Moon,
   Globe,
   Activity,
-  MapPin,
   Info,
   Bug,
   Check,
@@ -37,11 +35,13 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Settings'>;
 
 export const SettingsScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { themeMode, setThemeMode } = useTheme();
   const { language, setLanguage } = useLanguage();
   const { location, hasPermission } = useLocation();
   const { northReference, setNorthReference, debugMode, setDebugMode } = useCompass(
+    location?.latitude || 0,
+    location?.longitude || 0,
     location?.declination || 0
   );
 
@@ -294,7 +294,7 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      {/* Full Language Picker Modal with all 10 Indian languages */}
+      {/* Language Picker Modal */}
       <Modal
         visible={languageModalVisible}
         transparent
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.headingBold,
     backgroundColor: 'transparent',
   },
   scrollContent: {
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: 8,
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   },
   itemLabel: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: typography.fontFamily.bold,
     marginBottom: 10,
     backgroundColor: 'transparent',
   },
@@ -425,11 +425,12 @@ const styles = StyleSheet.create({
   },
   segmentText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: typography.fontFamily.semibold,
     backgroundColor: 'transparent',
   },
   warningText: {
     fontSize: 12,
+    fontFamily: typography.fontFamily.regular,
     marginTop: 10,
     lineHeight: 16,
     backgroundColor: 'transparent',
@@ -458,12 +459,12 @@ const styles = StyleSheet.create({
   },
   rowTitle: {
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: typography.fontFamily.semibold,
     backgroundColor: 'transparent',
   },
   rowSubtitle: {
     fontSize: 13,
-    fontWeight: '500',
+    fontFamily: typography.fontFamily.medium,
     marginTop: 2,
     backgroundColor: 'transparent',
   },
@@ -494,7 +495,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.headingBold,
     backgroundColor: 'transparent',
   },
   modalCloseBtn: {
@@ -513,11 +514,12 @@ const styles = StyleSheet.create({
   },
   langNativeText: {
     fontSize: 17,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.bold,
     backgroundColor: 'transparent',
   },
   langEngText: {
     fontSize: 12,
+    fontFamily: typography.fontFamily.regular,
     marginTop: 2,
     backgroundColor: 'transparent',
   },

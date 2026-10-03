@@ -86,5 +86,21 @@
   "request_permission": "অনুমতির অনুরোধ করুন",
   "continue": "চালিয়ে যান",
   "close": "বন্ধ করুন",
-  "back": "ফিরে যান"
+  "back": "ফিরে যান",
+  "solar_cycle": "সূর্য চক্র",
+  "sunrise": "সূর্যোদয়",
+  "sunset": "সূর্যাস্ত",
+  "sun_azimuth": "সূর্য কোণ",
+  "elevation": "উচ্চতা কোণ",
+  "below_horizon": "দিগন্তের নিচে",
+  "azimuth": "দিক কোণ",
+  "phase_dawn": "ভোর",
+  "phase_day": "দিনের বেলা",
+  "phase_golden_hour": "সোনালী ক্ষণ",
+  "phase_dusk": "গোধূলি",
+  "phase_night": "রাত",
+  "sun_tracker": "সূর্য ট্র্যাকার",
+  "solar_tracker_on": "সূর্য ট্র্যাকার: চালু",
+  "solar_tracker_off": "সূর্য ট্র্যাকার: বন্ধ",
+  "solar_position": "সূর্যের অবস্থান"
 }

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { SensorStatus as StatusType, SensorAccuracy } from '../types/compass';
 import { useTheme } from '../hooks/useTheme';
+import { typography } from '../theme/typography';
 import { t } from '../i18n';
 import { AlertTriangle, RefreshCw } from 'lucide-react-native';
 
@@ -12,7 +13,7 @@ interface SensorStatusProps {
   onCalibratePress?: () => void;
 }
 
-export const SensorStatus: React.FC<SensorStatusProps> = ({
+const SensorStatusComponent: React.FC<SensorStatusProps> = ({
   status,
   accuracy,
   onCalibratePress,
@@ -54,7 +55,7 @@ export const SensorStatus: React.FC<SensorStatusProps> = ({
       <View style={[styles.badge, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
         <View style={[styles.dot, { backgroundColor: getStatusColor() }]} />
         <Text style={[styles.statusText, { color: colors.textPrimary }]}>
-          {t('sensor_status')}: <Text style={{ fontWeight: '700', color: getStatusColor() }}>{getStatusText()}</Text>
+          {t('sensor_status')}: <Text style={{ fontFamily: typography.fontFamily.bold, color: getStatusColor() }}>{getStatusText()}</Text>
         </Text>
       </View>
 
@@ -81,6 +82,8 @@ export const SensorStatus: React.FC<SensorStatusProps> = ({
   );
 };
 
+export const SensorStatus = React.memo(SensorStatusComponent);
+
 const styles = StyleSheet.create({
   container: {
     marginVertical: 6,
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: typography.fontFamily.medium,
     backgroundColor: 'transparent',
   },
   warningBanner: {
@@ -120,12 +123,12 @@ const styles = StyleSheet.create({
   },
   warningTitle: {
     fontSize: 13,
-    fontWeight: '600',
+    fontFamily: typography.fontFamily.semibold,
     backgroundColor: 'transparent',
   },
   warningSub: {
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.bold,
     marginTop: 2,
     backgroundColor: 'transparent',
   },

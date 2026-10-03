@@ -86,5 +86,21 @@
   "request_permission": "అనుమతి కోరండి",
   "continue": "కొనసాగించండి",
   "close": "మూసివేయి",
-  "back": "వెనుకకు"
+  "back": "వెనుకకు",
+  "solar_cycle": "సూర్య చక్రం",
+  "sunrise": "సూర్యోదయం",
+  "sunset": "సూర్యాస్తమయం",
+  "sun_azimuth": "సూర్య కోణం",
+  "elevation": "ఎత్తు కోణం",
+  "below_horizon": "క్షితిజం క్రింద",
+  "azimuth": "కోణం",
+  "phase_dawn": "ఉషోదయం",
+  "phase_day": "పగలు",
+  "phase_golden_hour": "బంగారు వేళ",
+  "phase_dusk": "సాయంత్రం",
+  "phase_night": "రాత్రి",
+  "sun_tracker": "సూర్య ట్రాకర్",
+  "solar_tracker_on": "సూర్య ట్రాకర్: ఆన్",
+  "solar_tracker_off": "సూర్య ట్రాకర్: ఆఫ్",
+  "solar_position": "సూర్య స్థానం"
 }

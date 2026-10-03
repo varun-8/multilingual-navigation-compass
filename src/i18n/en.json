@@ -86,5 +86,21 @@
   "request_permission": "Request Permission",
   "continue": "Continue",
   "close": "Close",
-  "back": "Back"
+  "back": "Back",
+  "solar_cycle": "Sun Cycle",
+  "sunrise": "Sunrise",
+  "sunset": "Sunset",
+  "sun_azimuth": "Sun Azimuth",
+  "elevation": "Elevation",
+  "below_horizon": "Below Horizon",
+  "azimuth": "Azimuth",
+  "phase_dawn": "Dawn",
+  "phase_day": "Daytime",
+  "phase_golden_hour": "Golden Hour",
+  "phase_dusk": "Dusk",
+  "phase_night": "Nighttime",
+  "sun_tracker": "Sun Tracker",
+  "solar_tracker_on": "Sun Tracker ON",
+  "solar_tracker_off": "Sun Tracker OFF",
+  "solar_position": "Solar Position"
 }

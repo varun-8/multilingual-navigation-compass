@@ -86,5 +86,21 @@
   "request_permission": "அனுமதி கோரு",
   "continue": "தொடரவும்",
   "close": "மூடு",
-  "back": "பின்செல்"
+  "back": "பின்செல்",
+  "solar_cycle": "சூரிய சுழற்சி",
+  "sunrise": "சூரிய உதயம்",
+  "sunset": "சூரிய அஸ்தமனம்",
+  "sun_azimuth": "சூரிய கோணம்",
+  "elevation": "உயரக் கோணம்",
+  "below_horizon": "தொடுவானத்திற்கு கீழ்",
+  "azimuth": "கோணம்",
+  "phase_dawn": "விடியல்",
+  "phase_day": "பகல் நேரம்",
+  "phase_golden_hour": "பொன்மாலை நேரம்",
+  "phase_dusk": "அந்தி சாயும் நேரம்",
+  "phase_night": "இரவு நேரம்",
+  "sun_tracker": "சூரிய கண்காணிப்பாளர்",
+  "solar_tracker_on": "சூரிய நிலை: ஆன்",
+  "solar_tracker_off": "சூரிய நிலை: ஆஃப்",
+  "solar_position": "சூரிய அமைவிடம்"
 }

@@ -86,5 +86,21 @@
   "request_permission": "ਇਜਾਜ਼ਤ ਮੰਗੋ",
   "continue": "ਜਾਰੀ ਰੱਖੋ",
   "close": "ਬੰਦ ਕਰੋ",
-  "back": "ਵਾਪਸ"
+  "back": "ਵਾਪਸ",
+  "solar_cycle": "ਸੂਰਜ ਚੱਕਰ",
+  "sunrise": "ਸੂਰਜ ਚੜ੍ਹਨਾ",
+  "sunset": "ਸੂਰਜ ਡੁੱਬਣਾ",
+  "sun_azimuth": "ਸੂਰਜ ਦਿਸ਼ਾ ਕੋਣ",
+  "elevation": "ਉਚਾਈ ਕੋਣ",
+  "below_horizon": "ਖਿਤਿਜ ਤੋਂ ਹੇਠਾਂ",
+  "azimuth": "ਦਿਸ਼ਾ ਕੋਣ",
+  "phase_dawn": "ਪਹੁ-ਫੁਟਾਲਾ",
+  "phase_day": "ਦਿਨ ਵੇਲਾ",
+  "phase_golden_hour": "ਸੁਨਹਿਰੀ ਵੇਲਾ",
+  "phase_dusk": "ਸੰਧਿਆ",
+  "phase_night": "ਰਾਤ",
+  "sun_tracker": "ਸੂਰਜ ਟਰੈਕਰ",
+  "solar_tracker_on": "ਸੂਰਜ ਟਰੈਕਰ: ਚਾਲੂ",
+  "solar_tracker_off": "ਸੂਰਜ ਟਰੈਕਰ: ਬੰਦ",
+  "solar_position": "ਸੂਰਜ ਦੀ ਸਥਿਤੀ"
 }

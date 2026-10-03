@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import Svg, {
   Circle,
   Line,
@@ -10,162 +10,282 @@ import Svg, {
   LinearGradient,
   RadialGradient,
   Stop,
+  Path,
   Rect,
 } from 'react-native-svg';
-import { toRadians } from '../utils/angleUtils';
+import { toRadians, normalizeAngle } from '../utils/angleUtils';
+import { SolarData } from '../utils/sunUtils';
 
 interface CompassDialProps {
   heading: number; // 0..359
   pitch?: number; // deg (-90..90)
   roll?: number; // deg (-180..180)
   size?: number;
+  solarData?: SolarData | null;
+  showSunTracker?: boolean;
+  nightVision?: boolean;
 }
 
-const DEFAULT_SIZE = Math.min(Dimensions.get('window').width - 32, 360);
-
-export const CompassDial: React.FC<CompassDialProps> = ({
+const CompassDialComponent: React.FC<CompassDialProps> = ({
   heading,
   pitch = 0,
   roll = 0,
-  size = DEFAULT_SIZE,
+  size,
+  solarData,
+  showSunTracker = true,
+  nightVision = false,
 }) => {
-  const radius = size / 2;
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const isLandscape = windowWidth > windowHeight;
+
+  // Responsive adaptive dial diameter calculation
+  const computedSize = useMemo(() => {
+    if (size) return size;
+    const maxAvailableWidth = windowWidth - 36;
+    const maxAvailableHeight = isLandscape ? windowHeight * 0.72 : windowHeight * 0.44;
+    return Math.max(260, Math.min(maxAvailableWidth, maxAvailableHeight, 380));
+  }, [size, windowWidth, windowHeight, isLandscape]);
+
+  const radius = computedSize / 2;
   const center = radius;
+  const scale = computedSize / 360;
 
-  // Concentric ring radii
-  const outerBezelRadius = radius - 4;
-  const innerBezelRadius = radius - 14;
-  const dialRadius = radius - 20;
-  const tickOuterRadius = dialRadius - 4;
+  // Proportional concentric ring radii
+  const outerBezelRadius = radius - 4 * scale;
+  const innerBezelRadius = radius - 14 * scale;
+  const dialRadius = radius - 20 * scale;
+  const tickOuterRadius = dialRadius - 4 * scale;
 
-  const majorTickLength = 14;
-  const mediumTickLength = 9;
-  const minorTickLength = 5;
+  const majorTickLength = 14 * scale;
+  const mediumTickLength = 9 * scale;
+  const minorTickLength = 5 * scale;
 
-  const degreeRadius = dialRadius - 32;
-  const cardinalRadius = dialRadius - 52;
-  const intercardinalRadius = dialRadius - 62;
-  const needleLength = dialRadius - 38;
+  const degreeRadius = dialRadius - 32 * scale;
+  const intercardinalRadius = dialRadius - 62 * scale;
+  const needleLength = dialRadius - 38 * scale;
 
-  // Generate 120 precision ticks (every 3 degrees for high-end aeronautical look)
-  const ticks = Array.from({ length: 120 }, (_, i) => {
-    const angleDeg = i * 3;
-    const isCardinal = angleDeg % 90 === 0;
-    const isMajor = angleDeg % 30 === 0;
-    const isMedium = angleDeg % 15 === 0;
+  // Theme color tokens
+  const colors = useMemo(() => ({
+    bezelOuter: nightVision ? '#180000' : '#0B0F19',
+    bezelStroke: nightVision ? '#3F0000' : '#1E293B',
+    dialBg1: nightVision ? '#120000' : '#0F172A',
+    dialBg2: nightVision ? '#090000' : '#050811',
+    tickMajor: nightVision ? '#FF3333' : '#F8FAFC',
+    tickMedium: nightVision ? '#AA2222' : '#94A3B8',
+    tickMinor: nightVision ? '#661111' : '#475569',
+    north: nightVision ? '#FF0000' : '#EF4444',
+    south: nightVision ? '#AA0000' : '#3B82F6',
+    accentText: nightVision ? '#FF4444' : '#94A3B8',
+    reticleOk: nightVision ? '#FF0000' : '#10B981',
+    reticleWarn: nightVision ? '#AA4400' : '#F59E0B',
+  }), [nightVision]);
 
-    const angleRad = toRadians(angleDeg - 90);
-    const tickLen = isCardinal
-      ? 0
-      : isMajor
-      ? majorTickLength
-      : isMedium
-      ? mediumTickLength
-      : minorTickLength;
+  // Memoize 120 precision ticks
+  const ticks = useMemo(() => {
+    return Array.from({ length: 120 }, (_, i) => {
+      const angleDeg = i * 3;
+      const isCardinal = angleDeg % 90 === 0;
+      const isMajor = angleDeg % 30 === 0;
+      const isMedium = angleDeg % 15 === 0;
 
-    if (tickLen === 0) return null;
+      const angleRad = toRadians(angleDeg - 90);
+      const tickLen = isCardinal
+        ? 0
+        : isMajor
+        ? majorTickLength
+        : isMedium
+        ? mediumTickLength
+        : minorTickLength;
 
-    const x1 = center + tickOuterRadius * Math.cos(angleRad);
-    const y1 = center + tickOuterRadius * Math.sin(angleRad);
-    const x2 = center + (tickOuterRadius - tickLen) * Math.cos(angleRad);
-    const y2 = center + (tickOuterRadius - tickLen) * Math.sin(angleRad);
+      if (tickLen === 0) return null;
 
-    const strokeWidth = isMajor ? 2 : isMedium ? 1.5 : 0.8;
-    const stroke = isMajor ? '#F8FAFC' : isMedium ? '#94A3B8' : '#475569';
-    const opacity = isMajor ? 0.95 : isMedium ? 0.75 : 0.45;
+      const x1 = center + tickOuterRadius * Math.cos(angleRad);
+      const y1 = center + tickOuterRadius * Math.sin(angleRad);
+      const x2 = center + (tickOuterRadius - tickLen) * Math.cos(angleRad);
+      const y2 = center + (tickOuterRadius - tickLen) * Math.sin(angleRad);
 
-    return { key: i, x1, y1, x2, y2, strokeWidth, stroke, opacity };
-  }).filter(Boolean);
+      const strokeWidth = (isMajor ? 2 : isMedium ? 1.5 : 0.8) * Math.max(0.8, scale);
+      const stroke = isMajor ? colors.tickMajor : isMedium ? colors.tickMedium : colors.tickMinor;
+      const opacity = isMajor ? 0.95 : isMedium ? 0.75 : 0.45;
 
-  // Degree numbers around the dial (every 30 deg except cardinals 0, 90, 180, 270)
-  const degreeNumbers = [30, 60, 120, 150, 210, 240, 300, 330].map((deg) => {
-    const angleRad = toRadians(deg - 90);
-    const x = center + degreeRadius * Math.cos(angleRad);
-    const y = center + degreeRadius * Math.sin(angleRad);
-    return { deg, text: `${deg}°`, x, y };
-  });
+      return { key: i, x1, y1, x2, y2, strokeWidth, stroke, opacity };
+    }).filter(Boolean);
+  }, [center, tickOuterRadius, majorTickLength, mediumTickLength, minorTickLength, colors, scale]);
+
+  // Degree numbers around the dial
+  const degreeNumbers = useMemo(() => {
+    return [30, 60, 120, 150, 210, 240, 300, 330].map((deg) => {
+      const angleRad = toRadians(deg - 90);
+      const x = center + degreeRadius * Math.cos(angleRad);
+      const y = center + degreeRadius * Math.sin(angleRad);
+      return { deg, text: `${deg}°`, x, y };
+    });
+  }, [center, degreeRadius]);
 
   // Intercardinals (NE, SE, SW, NW)
-  const intercardinals = [
-    { code: 'NE', deg: 45 },
-    { code: 'SE', deg: 135 },
-    { code: 'SW', deg: 225 },
-    { code: 'NW', deg: 315 },
-  ].map(({ code, deg }) => {
-    const angleRad = toRadians(deg - 90);
-    const x = center + intercardinalRadius * Math.cos(angleRad);
-    const y = center + intercardinalRadius * Math.sin(angleRad);
-    return { code, deg, x, y };
-  });
+  const intercardinals = useMemo(() => {
+    return [
+      { code: 'NE', deg: 45 },
+      { code: 'SE', deg: 135 },
+      { code: 'SW', deg: 225 },
+      { code: 'NW', deg: 315 },
+    ].map(({ code, deg }) => {
+      const angleRad = toRadians(deg - 90);
+      const x = center + intercardinalRadius * Math.cos(angleRad);
+      const y = center + intercardinalRadius * Math.sin(angleRad);
+      return { code, deg, x, y };
+    });
+  }, [center, intercardinalRadius]);
 
   // Level Bubble offsets based on pitch and roll
-  const maxTiltOffset = 28;
+  const maxTiltOffset = 26 * scale;
   const bubbleX = Math.max(-maxTiltOffset, Math.min(maxTiltOffset, (-roll / 30) * maxTiltOffset));
   const bubbleY = Math.max(-maxTiltOffset, Math.min(maxTiltOffset, (pitch / 30) * maxTiltOffset));
   const totalTilt = Math.sqrt(pitch * pitch + roll * roll);
   const isLevel = totalTilt <= 4;
 
+  // Helper for marker positioning on dial perimeter
+  const getMarkerCoords = (azimuthDeg: number, radiusOffset: number = 18) => {
+    const rad = toRadians(azimuthDeg - 90);
+    const r = dialRadius - radiusOffset * scale;
+    return {
+      x: center + r * Math.cos(rad),
+      y: center + r * Math.sin(rad),
+      rad,
+    };
+  };
+
+  // Helper function to generate smooth SVG path for the solar ecliptic daytime arc
+  const daylightArcPath = useMemo(() => {
+    if (!solarData) return '';
+    const r = dialRadius - 20 * scale;
+    const startRad = toRadians(solarData.sunriseAzimuth - 90);
+    const endRad = toRadians(solarData.sunsetAzimuth - 90);
+
+    const x1 = center + r * Math.cos(startRad);
+    const y1 = center + r * Math.sin(startRad);
+    const x2 = center + r * Math.cos(endRad);
+    const y2 = center + r * Math.sin(endRad);
+
+    const deltaDeg = normalizeAngle(solarData.sunsetAzimuth - solarData.sunriseAzimuth);
+    const largeArcFlag = deltaDeg > 180 ? 1 : 0;
+
+    return `M ${x1} ${y1} A ${r} ${r} 0 ${largeArcFlag} 1 ${x2} ${y2}`;
+  }, [solarData, dialRadius, scale, center]);
+
   return (
-    <View style={[styles.container, { width: size, height: size }]}>
+    <View style={[styles.container, { width: computedSize, height: computedSize }]}>
       {/* Top Precision Heading Sight (Fixed at 12 o'clock) */}
-      <View style={styles.topSightContainer}>
-        <Svg width={28} height={22} viewBox="0 0 28 22">
+      <View style={[styles.topSightContainer, { top: -4 * scale }]}>
+        <Svg width={28 * scale} height={22 * scale} viewBox="0 0 28 22">
           <Defs>
             <LinearGradient id="sightGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <Stop offset="0%" stopColor="#F59E0B" />
-              <Stop offset="100%" stopColor="#D97706" />
+              <Stop offset="0%" stopColor={nightVision ? '#FF0000' : '#F59E0B'} />
+              <Stop offset="100%" stopColor={nightVision ? '#AA0000' : '#D97706'} />
             </LinearGradient>
           </Defs>
-          {/* Tactical Marker Chevron */}
           <Polygon points="14,20 2,2 26,2" fill="url(#sightGrad)" />
-          <Polygon points="14,15 6,5 22,5" fill="#FBBF24" />
+          <Polygon points="14,15 6,5 22,5" fill={nightVision ? '#FF3333' : '#FBBF24'} />
           <Line x1="14" y1="0" x2="14" y2="8" stroke="#FFFFFF" strokeWidth="2" />
         </Svg>
       </View>
 
       {/* Main Rotating Vector Compass Dial */}
       <Svg
-        width={size}
-        height={size}
+        width={computedSize}
+        height={computedSize}
         style={{ transform: [{ rotate: `${-heading}deg` }] }}
       >
         <Defs>
-          {/* Outer Bezel Radial Dark Gradient */}
           <RadialGradient id="outerBezelGrad" cx="50%" cy="50%" r="50%">
-            <Stop offset="80%" stopColor="#0B0F19" />
-            <Stop offset="95%" stopColor="#1E293B" />
-            <Stop offset="100%" stopColor="#334155" />
+            <Stop offset="80%" stopColor={colors.bezelOuter} />
+            <Stop offset="95%" stopColor={colors.bezelStroke} />
+            <Stop offset="100%" stopColor={nightVision ? '#550000' : '#334155'} />
           </RadialGradient>
 
-          {/* Inner Dial Face Radial Gradient */}
           <RadialGradient id="innerDialGrad" cx="50%" cy="50%" r="50%">
-            <Stop offset="0%" stopColor="#0F172A" />
-            <Stop offset="65%" stopColor="#090D16" />
-            <Stop offset="100%" stopColor="#050811" />
+            <Stop offset="0%" stopColor={colors.dialBg1} />
+            <Stop offset="65%" stopColor={colors.bezelOuter} />
+            <Stop offset="100%" stopColor={colors.dialBg2} />
           </RadialGradient>
 
-          {/* Glowing Center Hub Radial Gradient */}
           <RadialGradient id="centerHubGrad" cx="50%" cy="50%" r="50%">
-            <Stop offset="0%" stopColor="#FBBF24" />
-            <Stop offset="70%" stopColor="#D97706" />
-            <Stop offset="100%" stopColor="#78350F" />
+            <Stop offset="0%" stopColor={nightVision ? '#FF3333' : '#FBBF24'} />
+            <Stop offset="70%" stopColor={nightVision ? '#AA0000' : '#D97706'} />
+            <Stop offset="100%" stopColor={nightVision ? '#550000' : '#78350F'} />
           </RadialGradient>
 
-          {/* Level Reticle Ring Gradient */}
           <RadialGradient id="levelZoneGrad" cx="50%" cy="50%" r="50%">
-            <Stop offset="0%" stopColor={isLevel ? '#10B98125' : '#F59E0B15'} />
+            <Stop offset="0%" stopColor={isLevel ? `${colors.reticleOk}25` : `${colors.reticleWarn}15`} />
             <Stop offset="100%" stopColor="transparent" />
           </RadialGradient>
+
+          {/* High-Impact Multi-Tier Solar Corona Glow */}
+          <RadialGradient id="sunCoronaGrad" cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor="#FFFBEB" stopOpacity={0.95} />
+            <Stop offset="30%" stopColor="#FDE047" stopOpacity={0.8} />
+            <Stop offset="60%" stopColor="#F59E0B" stopOpacity={0.4} />
+            <Stop offset="100%" stopColor="#D97706" stopOpacity={0} />
+          </RadialGradient>
+
+          {/* Deep Volumetric Atmospheric Solar Corona */}
+          <RadialGradient id="sunCoronaVolumetric" cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor="#FFFDF0" stopOpacity={1} />
+            <Stop offset="22%" stopColor="#FEF08A" stopOpacity={0.85} />
+            <Stop offset="48%" stopColor="#FBBF24" stopOpacity={0.45} />
+            <Stop offset="78%" stopColor="#F59E0B" stopOpacity={0.12} />
+            <Stop offset="100%" stopColor="#D97706" stopOpacity={0} />
+          </RadialGradient>
+
+          {/* 3D Realistic Plasma Core Gradient */}
+          <RadialGradient id="sunOrb3D" cx="35%" cy="32%" r="68%">
+            <Stop offset="0%" stopColor="#FFFFFF" />
+            <Stop offset="20%" stopColor="#FFFBEB" />
+            <Stop offset="45%" stopColor="#FEF08A" />
+            <Stop offset="72%" stopColor="#F59E0B" />
+            <Stop offset="100%" stopColor="#B45309" />
+          </RadialGradient>
+
+          {/* Nighttime Celestial Moonlit Gradient */}
+          <RadialGradient id="sunNightOrb" cx="35%" cy="32%" r="68%">
+            <Stop offset="0%" stopColor="#FFFFFF" />
+            <Stop offset="30%" stopColor="#E0E7FF" />
+            <Stop offset="65%" stopColor="#818CF8" />
+            <Stop offset="90%" stopColor="#4338CA" />
+            <Stop offset="100%" stopColor="#1E1B4B" />
+          </RadialGradient>
+
+          {/* Nighttime Cosmic Corona Gradient */}
+          <RadialGradient id="sunNightCorona" cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor="#C7D2FE" stopOpacity={0.7} />
+            <Stop offset="40%" stopColor="#818CF8" stopOpacity={0.3} />
+            <Stop offset="80%" stopColor="#4338CA" stopOpacity={0.08} />
+            <Stop offset="100%" stopColor="#1E1B4B" stopOpacity={0} />
+          </RadialGradient>
+
+          {/* Luminous Celestial Ecliptic Arc Gradient */}
+          <LinearGradient id="eclipticArcGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <Stop offset="0%" stopColor="#F59E0B" stopOpacity={0.9} />
+            <Stop offset="50%" stopColor="#FEF08A" stopOpacity={1} />
+            <Stop offset="100%" stopColor="#F43F5E" stopOpacity={0.9} />
+          </LinearGradient>
+
+          {/* Luminous Solar Laser Beam Gradient */}
+          <LinearGradient id="sunLaserGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor="#F59E0B" stopOpacity={0.15} />
+            <Stop offset="50%" stopColor="#FBBF24" stopOpacity={0.6} />
+            <Stop offset="100%" stopColor="#FEF08A" stopOpacity={1} />
+          </LinearGradient>
         </Defs>
 
-        {/* 1. Outer Stealth Metallic Bezel */}
+        {/* 1. Outer Metallic Bezel */}
         <Circle
           cx={center}
           cy={center}
           r={outerBezelRadius}
           fill="url(#outerBezelGrad)"
-          stroke="#1E293B"
-          strokeWidth={2}
+          stroke={colors.bezelStroke}
+          strokeWidth={2 * scale}
         />
 
         {/* 2. Concentric Bezel Accent Ring */}
@@ -174,7 +294,7 @@ export const CompassDial: React.FC<CompassDialProps> = ({
           cy={center}
           r={innerBezelRadius}
           fill="none"
-          stroke="#334155"
+          stroke={colors.bezelStroke}
           strokeWidth={1}
           strokeDasharray="4 2"
           opacity={0.6}
@@ -186,8 +306,8 @@ export const CompassDial: React.FC<CompassDialProps> = ({
           cy={center}
           r={dialRadius}
           fill="url(#innerDialGrad)"
-          stroke="#1E293B"
-          strokeWidth={1.5}
+          stroke={colors.bezelStroke}
+          strokeWidth={1.5 * scale}
         />
 
         {/* 4. Outer Tick Track Boundary */}
@@ -196,18 +316,18 @@ export const CompassDial: React.FC<CompassDialProps> = ({
           cy={center}
           r={tickOuterRadius}
           fill="none"
-          stroke="#334155"
+          stroke={colors.bezelStroke}
           strokeWidth={1}
           opacity={0.8}
         />
 
-        {/* 5. Inner Level Boundary Ring */}
+        {/* 5. Inner Boundary Ring */}
         <Circle
           cx={center}
           cy={center}
-          r={degreeRadius + 12}
+          r={degreeRadius + 12 * scale}
           fill="none"
-          stroke="#1E293B"
+          stroke={colors.bezelStroke}
           strokeWidth={1}
           opacity={0.5}
         />
@@ -229,15 +349,15 @@ export const CompassDial: React.FC<CompassDialProps> = ({
           ))}
         </G>
 
-        {/* 7. Degree Numeric Labels (30°, 60°, 120°, 150°, 210°, 240°, 300°, 330°) */}
+        {/* 7. Degree Numeric Labels */}
         <G>
           {degreeNumbers.map((lbl) => (
             <SvgText
               key={lbl.deg}
               x={lbl.x}
-              y={lbl.y + 4}
-              fill="#94A3B8"
-              fontSize={10}
+              y={lbl.y + 4 * scale}
+              fill={colors.accentText}
+              fontSize={Math.max(8, 10 * scale)}
               fontWeight="700"
               fontFamily="System"
               textAnchor="middle"
@@ -253,9 +373,9 @@ export const CompassDial: React.FC<CompassDialProps> = ({
             <SvgText
               key={ic.code}
               x={ic.x}
-              y={ic.y + 4}
-              fill="#64748B"
-              fontSize={12}
+              y={ic.y + 4 * scale}
+              fill={nightVision ? '#AA2222' : '#64748B'}
+              fontSize={Math.max(10, 12 * scale)}
               fontWeight="800"
               letterSpacing={0.5}
               textAnchor="middle"
@@ -265,18 +385,397 @@ export const CompassDial: React.FC<CompassDialProps> = ({
           ))}
         </G>
 
-        {/* 9. CARDINALS: NORTH (Apex Red Indicator + 'N') */}
+        {/* 9. ULTRA-MODERN REAL-TIME CELESTIAL SUN POSITION INDICATOR */}
+        {showSunTracker && solarData && (
+          <G key="sun-tracker-layer">
+            {/* A. Golden Daytime Ecliptic Path Arc across sky */}
+            {daylightArcPath !== '' && (
+              <G>
+                {/* Luminous atmospheric sky trajectory glow */}
+                <Path
+                  d={daylightArcPath}
+                  fill="none"
+                  stroke="url(#eclipticArcGrad)"
+                  strokeWidth={5 * scale}
+                  opacity={0.22}
+                  strokeLinecap="round"
+                />
+                {/* Precision dashed ecliptic flight path */}
+                <Path
+                  d={daylightArcPath}
+                  fill="none"
+                  stroke="url(#eclipticArcGrad)"
+                  strokeWidth={1.8 * scale}
+                  strokeDasharray="4 3"
+                  opacity={0.85}
+                  strokeLinecap="round"
+                />
+              </G>
+            )}
+
+            {/* B. Center-to-Sun High-Tech Laser Beam Vector */}
+            {(() => {
+              const sunPt = getMarkerCoords(solarData.currentSunAzimuth, 20);
+              const innerRadius = 28 * scale;
+              const startX = center + innerRadius * Math.cos(sunPt.rad);
+              const startY = center + innerRadius * Math.sin(sunPt.rad);
+              const isDay = solarData.isDaytime;
+
+              return (
+                <G key="sun-vector-beam">
+                  {/* Outer Glow Halo Beam */}
+                  <Line
+                    x1={startX}
+                    y1={startY}
+                    x2={sunPt.x}
+                    y2={sunPt.y}
+                    stroke={isDay ? '#FBBF24' : '#6366F1'}
+                    strokeWidth={5 * scale}
+                    opacity={isDay ? 0.16 : 0.08}
+                    strokeLinecap="round"
+                  />
+                  {/* Core Precision Laser Line */}
+                  <Line
+                    x1={startX}
+                    y1={startY}
+                    x2={sunPt.x}
+                    y2={sunPt.y}
+                    stroke={isDay ? 'url(#sunLaserGrad)' : '#818CF8'}
+                    strokeWidth={1.8 * scale}
+                    strokeDasharray="5 3"
+                    opacity={isDay ? 0.95 : 0.6}
+                  />
+                  {/* Outer Bezel Solar Precision Alignment Notch Chevron */}
+                  {(() => {
+                    const rimX1 = center + (dialRadius - 1 * scale) * Math.cos(sunPt.rad);
+                    const rimY1 = center + (dialRadius - 1 * scale) * Math.sin(sunPt.rad);
+                    const rimX2 = center + (dialRadius + 9 * scale) * Math.cos(sunPt.rad);
+                    const rimY2 = center + (dialRadius + 9 * scale) * Math.sin(sunPt.rad);
+                    return (
+                      <G>
+                        <Line
+                          x1={rimX1}
+                          y1={rimY1}
+                          x2={rimX2}
+                          y2={rimY2}
+                          stroke={isDay ? '#FDE047' : '#A5B4FC'}
+                          strokeWidth={3 * scale}
+                          strokeLinecap="round"
+                        />
+                        <Circle
+                          cx={center + (dialRadius + 9 * scale) * Math.cos(sunPt.rad)}
+                          cy={center + (dialRadius + 9 * scale) * Math.sin(sunPt.rad)}
+                          r={2 * scale}
+                          fill={isDay ? '#F59E0B' : '#6366F1'}
+                        />
+                      </G>
+                    );
+                  })()}
+                </G>
+              );
+            })()}
+
+            {/* C. Modern Sunrise Horizon Glyph (🌅 Dawn Anchor) */}
+            {(() => {
+              const pt = getMarkerCoords(solarData.sunriseAzimuth, 22);
+              return (
+                <G key="sunrise-anchor">
+                  {/* Subtle Horizon Line */}
+                  <Line
+                    x1={pt.x - 8 * scale}
+                    y1={pt.y + 1 * scale}
+                    x2={pt.x + 8 * scale}
+                    y2={pt.y + 1 * scale}
+                    stroke="#F59E0B"
+                    strokeWidth={1.5 * scale}
+                    strokeLinecap="round"
+                    opacity={0.8}
+                  />
+                  {/* Ascending Dawn Disc */}
+                  <Circle cx={pt.x} cy={pt.y - 1.5 * scale} r={4.5 * scale} fill="#F59E0B" stroke="#FFFBEB" strokeWidth={1} />
+                  {/* Rising Rays */}
+                  <Line x1={pt.x} y1={pt.y - 6.5 * scale} x2={pt.x} y2={pt.y - 9 * scale} stroke="#FDE047" strokeWidth={1.2 * scale} strokeLinecap="round" />
+                  <Line x1={pt.x - 4.5 * scale} y1={pt.y - 5 * scale} x2={pt.x - 6.5 * scale} y2={pt.y - 7 * scale} stroke="#FDE047" strokeWidth={1.2 * scale} strokeLinecap="round" />
+                  <Line x1={pt.x + 4.5 * scale} y1={pt.y - 5 * scale} x2={pt.x + 6.5 * scale} y2={pt.y - 7 * scale} stroke="#FDE047" strokeWidth={1.2 * scale} strokeLinecap="round" />
+
+                  {/* Azimuth Callout Tag */}
+                  <SvgText
+                    x={pt.x}
+                    y={pt.y + 11 * scale}
+                    fill="#F59E0B"
+                    fontSize={Math.max(6, 7.5 * scale)}
+                    fontWeight="800"
+                    textAnchor="middle"
+                  >
+                    RISE {solarData.sunriseAzimuth}°
+                  </SvgText>
+                </G>
+              );
+            })()}
+
+            {/* D. Modern Sunset Horizon Glyph (🌇 Dusk Anchor) */}
+            {(() => {
+              const pt = getMarkerCoords(solarData.sunsetAzimuth, 22);
+              return (
+                <G key="sunset-anchor">
+                  {/* Horizon Line */}
+                  <Line
+                    x1={pt.x - 8 * scale}
+                    y1={pt.y + 1 * scale}
+                    x2={pt.x + 8 * scale}
+                    y2={pt.y + 1 * scale}
+                    stroke="#F43F5E"
+                    strokeWidth={1.5 * scale}
+                    strokeLinecap="round"
+                    opacity={0.8}
+                  />
+                  {/* Sinking Sunset Disc */}
+                  <Circle cx={pt.x} cy={pt.y + 1 * scale} r={4.5 * scale} fill="#F43F5E" stroke="#FFF1F2" strokeWidth={1} />
+                  {/* Dusk Glow Rays */}
+                  <Line x1={pt.x} y1={pt.y - 4 * scale} x2={pt.x} y2={pt.y - 6.5 * scale} stroke="#FB7185" strokeWidth={1.2 * scale} strokeLinecap="round" />
+                  <Line x1={pt.x - 4.5 * scale} y1={pt.y - 3 * scale} x2={pt.x - 6.5 * scale} y2={pt.y - 4.8 * scale} stroke="#FB7185" strokeWidth={1.2 * scale} strokeLinecap="round" />
+                  <Line x1={pt.x + 4.5 * scale} y1={pt.y - 3 * scale} x2={pt.x + 6.5 * scale} y2={pt.y - 4.8 * scale} stroke="#FB7185" strokeWidth={1.2 * scale} strokeLinecap="round" />
+
+                  {/* Azimuth Callout Tag */}
+                  <SvgText
+                    x={pt.x}
+                    y={pt.y + 11 * scale}
+                    fill="#F43F5E"
+                    fontSize={Math.max(6, 7.5 * scale)}
+                    fontWeight="800"
+                    textAnchor="middle"
+                  >
+                    SET {solarData.sunsetAzimuth}°
+                  </SvgText>
+                </G>
+              );
+            })()}
+
+            {/* E. BREATHTAKING VOLUMETRIC 3D RADIANT SUNBURST ORB */}
+            {(() => {
+              const pt = getMarkerCoords(solarData.currentSunAzimuth, 18);
+              const isDay = solarData.isDaytime;
+              const rCorona = 26 * scale;
+              const rCore = 6.5 * scale;
+              const rReticle = 16 * scale;
+              const rFlareMajor = 15 * scale;
+              const rFlareMinor = 10 * scale;
+
+              if (isDay) {
+                return (
+                  <G key="live-sun-graphic">
+                    {/* Layer 1: Multi-Tier Volumetric Atmospheric Corona Glow */}
+                    <Circle cx={pt.x} cy={pt.y} r={rCorona} fill="url(#sunCoronaVolumetric)" />
+
+                    {/* Layer 2: Precision Avionics Targeting Reticle Ring */}
+                    <Circle
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={rReticle}
+                      fill="none"
+                      stroke="#FDE047"
+                      strokeWidth={1}
+                      strokeDasharray="3 3"
+                      opacity={0.65}
+                    />
+
+                    {/* Reticle Micro Crosshairs (Top, Bottom, Left, Right) */}
+                    <Line x1={pt.x} y1={pt.y - rReticle - 3 * scale} x2={pt.x} y2={pt.y - rReticle + 2 * scale} stroke="#FDE047" strokeWidth={1.2 * scale} opacity={0.8} />
+                    <Line x1={pt.x} y1={pt.y + rReticle - 2 * scale} x2={pt.x} y2={pt.y + rReticle + 3 * scale} stroke="#FDE047" strokeWidth={1.2 * scale} opacity={0.8} />
+                    <Line x1={pt.x - rReticle - 3 * scale} y1={pt.y} x2={pt.x - rReticle + 2 * scale} y2={pt.y} stroke="#FDE047" strokeWidth={1.2 * scale} opacity={0.8} />
+                    <Line x1={pt.x + rReticle - 2 * scale} y1={pt.y} x2={pt.x + rReticle + 3 * scale} y2={pt.y} stroke="#FDE047" strokeWidth={1.2 * scale} opacity={0.8} />
+
+                    {/* Layer 3: 8-Point Faceted Diamond Starburst Rays */}
+                    <G opacity={0.92}>
+                      {/* Cardinal Diamond Flares */}
+                      {/* Top Spike */}
+                      <Polygon
+                        points={`${pt.x},${pt.y - rFlareMajor} ${pt.x + 2 * scale},${pt.y - 7.5 * scale} ${pt.x},${pt.y - 6 * scale} ${pt.x - 2 * scale},${pt.y - 7.5 * scale}`}
+                        fill="#FEF08A"
+                      />
+                      {/* Bottom Spike */}
+                      <Polygon
+                        points={`${pt.x},${pt.y + rFlareMajor} ${pt.x + 2 * scale},${pt.y + 7.5 * scale} ${pt.x},${pt.y + 6 * scale} ${pt.x - 2 * scale},${pt.y + 7.5 * scale}`}
+                        fill="#FEF08A"
+                      />
+                      {/* Left Spike */}
+                      <Polygon
+                        points={`${pt.x - rFlareMajor},${pt.y} ${pt.x - 7.5 * scale},${pt.y - 2 * scale} ${pt.x - 6 * scale},${pt.y} ${pt.x - 7.5 * scale},${pt.y + 2 * scale}`}
+                        fill="#FEF08A"
+                      />
+                      {/* Right Spike */}
+                      <Polygon
+                        points={`${pt.x + rFlareMajor},${pt.y} ${pt.x + 7.5 * scale},${pt.y - 2 * scale} ${pt.x + 6 * scale},${pt.y} ${pt.x + 7.5 * scale},${pt.y + 2 * scale}`}
+                        fill="#FEF08A"
+                      />
+
+                      {/* Diagonal Secondary Diamond Flares */}
+                      {(() => {
+                        const dOuter = rFlareMinor * 0.707;
+                        const dInner = 6 * scale * 0.707;
+                        const dMid = 7.5 * scale * 0.707;
+                        const perp = 1.3 * scale;
+                        return (
+                          <G opacity={0.85}>
+                            {/* Top-Right */}
+                            <Polygon
+                              points={`${pt.x + dOuter},${pt.y - dOuter} ${pt.x + dMid - perp},${pt.y - dMid - perp} ${pt.x + dInner},${pt.y - dInner} ${pt.x + dMid + perp},${pt.y - dMid + perp}`}
+                              fill="#F59E0B"
+                            />
+                            {/* Top-Left */}
+                            <Polygon
+                              points={`${pt.x - dOuter},${pt.y - dOuter} ${pt.x - dMid - perp},${pt.y - dMid + perp} ${pt.x - dInner},${pt.y - dInner} ${pt.x - dMid + perp},${pt.y - dMid - perp}`}
+                              fill="#F59E0B"
+                            />
+                            {/* Bottom-Right */}
+                            <Polygon
+                              points={`${pt.x + dOuter},${pt.y + dOuter} ${pt.x + dMid + perp},${pt.y + dMid - perp} ${pt.x + dInner},${pt.y + dInner} ${pt.x + dMid - perp},${pt.y + dMid + perp}`}
+                              fill="#F59E0B"
+                            />
+                            {/* Bottom-Left */}
+                            <Polygon
+                              points={`${pt.x - dOuter},${pt.y + dOuter} ${pt.x - dMid + perp},${pt.y + dMid + perp} ${pt.x - dInner},${pt.y + dInner} ${pt.x - dMid - perp},${pt.y + dMid - perp}`}
+                              fill="#F59E0B"
+                            />
+                          </G>
+                        );
+                      })()}
+                    </G>
+
+                    {/* Layer 4: Deep Gold Metallic Bezel Ring */}
+                    <Circle
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={rCore + 2 * scale}
+                      fill="#92400E"
+                      stroke="#FEF08A"
+                      strokeWidth={1.2 * scale}
+                    />
+
+                    {/* Layer 5: 3D Spherical Solar Plasma Core */}
+                    <Circle
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={rCore}
+                      fill="url(#sunOrb3D)"
+                    />
+
+                    {/* Layer 6: Dual Specular Glint Center */}
+                    <Circle
+                      cx={pt.x - 1.8 * scale}
+                      cy={pt.y - 1.8 * scale}
+                      r={2.2 * scale}
+                      fill="#FFFFFF"
+                      opacity={0.95}
+                    />
+                    <Circle
+                      cx={pt.x - 2.2 * scale}
+                      cy={pt.y - 2.2 * scale}
+                      r={1 * scale}
+                      fill="#FFFFFF"
+                    />
+
+                    {/* Layer 7: Cyber-Aeronautical Floating Telemetry HUD Badge */}
+                    <G transform={`translate(${pt.x}, ${pt.y + 15 * scale})`}>
+                      <Rect
+                        x={-28 * scale}
+                        y={-2 * scale}
+                        width={56 * scale}
+                        height={14 * scale}
+                        rx={7 * scale}
+                        fill="#090D16F5"
+                        stroke="#F59E0B"
+                        strokeWidth={1.2}
+                      />
+                      {/* Sun Icon dot inside badge */}
+                      <Circle cx={-19 * scale} cy={5 * scale} r={2.8 * scale} fill="#FDE047" stroke="#F59E0B" strokeWidth={0.8} />
+                      <SvgText
+                        x={3 * scale}
+                        y={8.2 * scale}
+                        fill="#FEF08A"
+                        fontSize={Math.max(7, 8.5 * scale)}
+                        fontWeight="800"
+                        fontFamily="System"
+                        textAnchor="middle"
+                      >
+                        +{solarData.currentSunElevation}° SUN
+                      </SvgText>
+                    </G>
+                  </G>
+                );
+              } else {
+                // Nighttime Celestial Representation (Sun under horizon)
+                return (
+                  <G key="night-sun-graphic">
+                    <Circle cx={pt.x} cy={pt.y} r={20 * scale} fill="url(#sunNightCorona)" />
+                    <Circle
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={12 * scale}
+                      fill="none"
+                      stroke="#818CF8"
+                      strokeWidth={1}
+                      strokeDasharray="2 3"
+                      opacity={0.6}
+                    />
+                    {/* 3D Moonlit Core Orb */}
+                    <Circle cx={pt.x} cy={pt.y} r={7.5 * scale} fill="url(#sunNightOrb)" stroke="#C7D2FE" strokeWidth={1 * scale} />
+                    {/* Twilight Silver Crescent Accent */}
+                    <Path
+                      d={`M ${pt.x - 2 * scale} ${pt.y - 4.5 * scale} A 4 4 0 0 0 ${pt.x - 2 * scale} ${pt.y + 4.5 * scale} A 5.5 5.5 0 0 1 ${pt.x - 2 * scale} ${pt.y - 4.5 * scale}`}
+                      fill="#E0E7FF"
+                    />
+                    {/* Micro Starlight Sparkle Diamond */}
+                    <Polygon
+                      points={`${pt.x + 3 * scale},${pt.y - 5 * scale} ${pt.x + 4 * scale},${pt.y - 4 * scale} ${pt.x + 3 * scale},${pt.y - 3 * scale} ${pt.x + 2 * scale},${pt.y - 4 * scale}`}
+                      fill="#FFFFFF"
+                      opacity={0.9}
+                    />
+
+                    {/* Night Telemetry HUD Badge */}
+                    <G transform={`translate(${pt.x}, ${pt.y + 15 * scale})`}>
+                      <Rect
+                        x={-28 * scale}
+                        y={-2 * scale}
+                        width={56 * scale}
+                        height={14 * scale}
+                        rx={7 * scale}
+                        fill="#090D16F5"
+                        stroke="#6366F1"
+                        strokeWidth={1.2}
+                      />
+                      {/* Moon dot inside badge */}
+                      <Circle cx={-19 * scale} cy={5 * scale} r={2.8 * scale} fill="#818CF8" />
+                      <SvgText
+                        x={3 * scale}
+                        y={8.2 * scale}
+                        fill="#C7D2FE"
+                        fontSize={Math.max(7, 8.5 * scale)}
+                        fontWeight="800"
+                        fontFamily="System"
+                        textAnchor="middle"
+                      >
+                        {solarData.currentSunElevation}° NIGHT
+                      </SvgText>
+                    </G>
+                  </G>
+                );
+              }
+            })()}
+          </G>
+        )}
+
+        {/* 10. CARDINALS: NORTH (Apex Red Indicator + 'N') */}
         <G>
-          {/* North Triangular Apex Marker */}
           <Polygon
-            points={`${center},${center - dialRadius + 5} ${center - 6},${center - dialRadius + 17} ${center + 6},${center - dialRadius + 17}`}
-            fill="#EF4444"
+            points={`${center},${center - dialRadius + 5 * scale} ${center - 6 * scale},${center - dialRadius + 17 * scale} ${center + 6 * scale},${center - dialRadius + 17 * scale}`}
+            fill={colors.north}
           />
           <SvgText
             x={center}
-            y={center - dialRadius + 38}
-            fill="#EF4444"
-            fontSize={22}
+            y={center - dialRadius + 38 * scale}
+            fill={colors.north}
+            fontSize={Math.max(16, 22 * scale)}
             fontWeight="900"
             letterSpacing={0.5}
             textAnchor="middle"
@@ -285,22 +784,22 @@ export const CompassDial: React.FC<CompassDialProps> = ({
           </SvgText>
         </G>
 
-        {/* 10. CARDINALS: SOUTH (Line + 'S' + 180°) */}
+        {/* 11. CARDINALS: SOUTH */}
         <G>
           <Line
             x1={center}
-            y1={center + dialRadius - 6}
+            y1={center + dialRadius - 6 * scale}
             x2={center}
-            y2={center + dialRadius - 18}
-            stroke="#F8FAFC"
-            strokeWidth={3}
+            y2={center + dialRadius - 18 * scale}
+            stroke={colors.tickMajor}
+            strokeWidth={3 * scale}
             strokeLinecap="round"
           />
           <SvgText
             x={center}
-            y={center + dialRadius - 26}
-            fill="#F8FAFC"
-            fontSize={20}
+            y={center + dialRadius - 26 * scale}
+            fill={colors.tickMajor}
+            fontSize={Math.max(15, 20 * scale)}
             fontWeight="900"
             textAnchor="middle"
           >
@@ -308,9 +807,9 @@ export const CompassDial: React.FC<CompassDialProps> = ({
           </SvgText>
           <SvgText
             x={center}
-            y={center + dialRadius - 46}
-            fill="#94A3B8"
-            fontSize={10}
+            y={center + dialRadius - 46 * scale}
+            fill={colors.accentText}
+            fontSize={Math.max(8, 10 * scale)}
             fontWeight="700"
             textAnchor="middle"
           >
@@ -318,32 +817,32 @@ export const CompassDial: React.FC<CompassDialProps> = ({
           </SvgText>
         </G>
 
-        {/* 11. CARDINALS: EAST (Line + 'E' + 90°) */}
+        {/* 12. CARDINALS: EAST */}
         <G>
           <Line
-            x1={center + dialRadius - 6}
+            x1={center + dialRadius - 6 * scale}
             y1={center}
-            x2={center + dialRadius - 18}
+            x2={center + dialRadius - 18 * scale}
             y2={center}
-            stroke="#F8FAFC"
-            strokeWidth={3}
+            stroke={colors.tickMajor}
+            strokeWidth={3 * scale}
             strokeLinecap="round"
           />
           <SvgText
-            x={center + dialRadius - 28}
-            y={center + 6}
-            fill="#F8FAFC"
-            fontSize={20}
+            x={center + dialRadius - 28 * scale}
+            y={center + 6 * scale}
+            fill={colors.tickMajor}
+            fontSize={Math.max(15, 20 * scale)}
             fontWeight="900"
             textAnchor="middle"
           >
             E
           </SvgText>
           <SvgText
-            x={center + dialRadius - 48}
-            y={center + 4}
-            fill="#94A3B8"
-            fontSize={10}
+            x={center + dialRadius - 48 * scale}
+            y={center + 4 * scale}
+            fill={colors.accentText}
+            fontSize={Math.max(8, 10 * scale)}
             fontWeight="700"
             textAnchor="middle"
           >
@@ -351,32 +850,32 @@ export const CompassDial: React.FC<CompassDialProps> = ({
           </SvgText>
         </G>
 
-        {/* 12. CARDINALS: WEST (Line + 'W' + 270°) */}
+        {/* 13. CARDINALS: WEST */}
         <G>
           <Line
-            x1={center - dialRadius + 6}
+            x1={center - dialRadius + 6 * scale}
             y1={center}
-            x2={center - dialRadius + 18}
+            x2={center - dialRadius + 18 * scale}
             y2={center}
-            stroke="#F8FAFC"
-            strokeWidth={3}
+            stroke={colors.tickMajor}
+            strokeWidth={3 * scale}
             strokeLinecap="round"
           />
           <SvgText
-            x={center - dialRadius + 28}
-            y={center + 6}
-            fill="#F8FAFC"
-            fontSize={20}
+            x={center - dialRadius + 28 * scale}
+            y={center + 6 * scale}
+            fill={colors.tickMajor}
+            fontSize={Math.max(15, 20 * scale)}
             fontWeight="900"
             textAnchor="middle"
           >
             W
           </SvgText>
           <SvgText
-            x={center - dialRadius + 50}
-            y={center + 4}
-            fill="#94A3B8"
-            fontSize={10}
+            x={center - dialRadius + 50 * scale}
+            y={center + 4 * scale}
+            fill={colors.accentText}
+            fontSize={Math.max(8, 10 * scale)}
             fontWeight="700"
             textAnchor="middle"
           >
@@ -384,21 +883,21 @@ export const CompassDial: React.FC<CompassDialProps> = ({
           </SvgText>
         </G>
 
-        {/* 13. Tactical Crosshair Reticle Grid */}
+        {/* 14. Tactical Crosshair Reticle Grid */}
         <G opacity={0.25}>
-          <Line x1={center} y1={center - 70} x2={center} y2={center - 24} stroke="#38BDF8" strokeWidth={1} strokeDasharray="3 3" />
-          <Line x1={center} y1={center + 24} x2={center} y2={center + 70} stroke="#38BDF8" strokeWidth={1} strokeDasharray="3 3" />
-          <Line x1={center - 70} y1={center} x2={center - 24} y2={center} stroke="#38BDF8" strokeWidth={1} strokeDasharray="3 3" />
-          <Line x1={center + 24} y1={center} x2={center + 70} y2={center} stroke="#38BDF8" strokeWidth={1} strokeDasharray="3 3" />
+          <Line x1={center} y1={center - 65 * scale} x2={center} y2={center - 24 * scale} stroke={nightVision ? '#FF0000' : '#38BDF8'} strokeWidth={1} strokeDasharray="3 3" />
+          <Line x1={center} y1={center + 24 * scale} x2={center} y2={center + 65 * scale} stroke={nightVision ? '#FF0000' : '#38BDF8'} strokeWidth={1} strokeDasharray="3 3" />
+          <Line x1={center - 65 * scale} y1={center} x2={center - 24 * scale} y2={center} stroke={nightVision ? '#FF0000' : '#38BDF8'} strokeWidth={1} strokeDasharray="3 3" />
+          <Line x1={center + 65 * scale} y1={center} x2={center + 24 * scale} y2={center} stroke={nightVision ? '#FF0000' : '#38BDF8'} strokeWidth={1} strokeDasharray="3 3" />
         </G>
 
-        {/* 14. Concentric Level Pitch/Roll Reference Target Zone */}
+        {/* 15. Concentric Level Pitch/Roll Reference Target Zone */}
         <Circle
           cx={center}
           cy={center}
-          r={maxTiltOffset + 2}
+          r={maxTiltOffset + 2 * scale}
           fill="url(#levelZoneGrad)"
-          stroke={isLevel ? '#10B981' : '#475569'}
+          stroke={isLevel ? colors.reticleOk : (nightVision ? '#882222' : '#475569')}
           strokeWidth={1}
           strokeDasharray="2 2"
           opacity={isLevel ? 0.8 : 0.4}
@@ -406,111 +905,100 @@ export const CompassDial: React.FC<CompassDialProps> = ({
         <Circle
           cx={center}
           cy={center}
-          r={12}
+          r={12 * scale}
           fill="none"
-          stroke={isLevel ? '#10B981' : '#334155'}
+          stroke={isLevel ? colors.reticleOk : (nightVision ? '#661111' : '#334155')}
           strokeWidth={0.8}
           opacity={0.6}
         />
 
-        {/* 15. HIGH-PRECISION 3D FACETED AERONAUTICAL NEEDLE */}
-        {/* North Pointer: Radiant Ruby / Neon Crimson Facets */}
+        {/* 16. 3D FACETED AERONAUTICAL NEEDLE */}
         <G>
-          {/* Left North Facet (Darker Shadow) */}
           <Polygon
-            points={`${center - 10},${center} ${center},${center - needleLength} ${center},${center}`}
-            fill="#DC2626"
+            points={`${center - 10 * scale},${center} ${center},${center - needleLength} ${center},${center}`}
+            fill={nightVision ? '#AA0000' : '#DC2626'}
           />
-          {/* Right North Facet (Lighter Highlight) */}
           <Polygon
-            points={`${center + 10},${center} ${center},${center - needleLength} ${center},${center}`}
-            fill="#EF4444"
+            points={`${center + 10 * scale},${center} ${center},${center - needleLength} ${center},${center}`}
+            fill={colors.north}
           />
-          {/* North Spine Center Highlight Line */}
           <Line
             x1={center}
-            y1={center - needleLength + 6}
+            y1={center - needleLength + 6 * scale}
             x2={center}
-            y2={center - 12}
-            stroke="#FCA5A5"
+            y2={center - 12 * scale}
+            stroke={nightVision ? '#FF8888' : '#FCA5A5'}
             strokeWidth={1}
             opacity={0.9}
           />
         </G>
 
-        {/* South Pointer: Electric Azure / Cobalt Facets */}
         <G>
-          {/* Left South Facet (Darker Shadow) */}
           <Polygon
-            points={`${center - 10},${center} ${center},${center + needleLength} ${center},${center}`}
-            fill="#1D4ED8"
+            points={`${center - 10 * scale},${center} ${center},${center + needleLength} ${center},${center}`}
+            fill={nightVision ? '#550000' : '#1D4ED8'}
           />
-          {/* Right South Facet (Lighter Highlight) */}
           <Polygon
-            points={`${center + 10},${center} ${center},${center + needleLength} ${center},${center}`}
-            fill="#3B82F6"
+            points={`${center + 10 * scale},${center} ${center},${center + needleLength} ${center},${center}`}
+            fill={colors.south}
           />
-          {/* South Spine Center Highlight Line */}
           <Line
             x1={center}
-            y1={center + 12}
+            y1={center + 12 * scale}
             x2={center}
-            y2={center + needleLength - 6}
-            stroke="#93C5FD"
+            y2={center + needleLength - 6 * scale}
+            stroke={nightVision ? '#AA5555' : '#93C5FD'}
             strokeWidth={1}
             opacity={0.9}
           />
         </G>
 
-        {/* 16. Metallic Pivot Hub with Concentric Brass Bearings */}
+        {/* 17. Metallic Pivot Hub */}
         <Circle
           cx={center}
           cy={center}
-          r={14}
+          r={14 * scale}
           fill="url(#centerHubGrad)"
-          stroke="#78350F"
+          stroke={nightVision ? '#AA0000' : '#78350F'}
           strokeWidth={1.5}
         />
         <Circle
           cx={center}
           cy={center}
-          r={9}
-          fill="#0B0F19"
-          stroke="#F59E0B"
+          r={9 * scale}
+          fill={colors.bezelOuter}
+          stroke={nightVision ? '#FF3333' : '#F59E0B'}
           strokeWidth={1}
         />
         <Circle
           cx={center}
           cy={center}
-          r={4}
-          fill="#FBBF24"
+          r={4 * scale}
+          fill={nightVision ? '#FF6666' : '#FBBF24'}
         />
 
-        {/* 17. Integrated Level Bubble Reticle (Counter-rotates to remain gravity-aligned) */}
+        {/* 18. Integrated Level Bubble Reticle */}
         <G transform={`rotate(${heading}, ${center}, ${center})`}>
-          {/* Bubble Glow Aura */}
           <Circle
             cx={center + bubbleX}
             cy={center + bubbleY}
-            r={7}
-            fill={isLevel ? '#10B981' : '#F59E0B'}
+            r={7 * scale}
+            fill={isLevel ? colors.reticleOk : colors.reticleWarn}
             opacity={0.3}
           />
-          {/* Bubble Core */}
           <Circle
             cx={center + bubbleX}
             cy={center + bubbleY}
-            r={5}
-            fill={isLevel ? '#34D399' : '#FBBF24'}
+            r={5 * scale}
+            fill={isLevel ? (nightVision ? '#FF3333' : '#34D399') : (nightVision ? '#FF9900' : '#FBBF24')}
             stroke="#FFFFFF"
             strokeWidth={1}
             opacity={0.95}
           />
-          {/* Specular Glint */}
           <Circle
-            cx={center + bubbleX - 1.5}
-            cy={center + bubbleY - 1.5}
-            r={1.5}
+            cx={center + bubbleX - 1.5 * scale}
+            cy={center + bubbleY - 1.5 * scale}
+            r={1.5 * scale}
             fill="#FFFFFF"
           />
         </G>
@@ -518,6 +1006,8 @@ export const CompassDial: React.FC<CompassDialProps> = ({
     </View>
   );
 };
+
+export const CompassDial = React.memo(CompassDialComponent);
 
 const styles = StyleSheet.create({
   container: {
@@ -527,7 +1017,6 @@ const styles = StyleSheet.create({
   },
   topSightContainer: {
     position: 'absolute',
-    top: -4,
     zIndex: 30,
     alignItems: 'center',
   },

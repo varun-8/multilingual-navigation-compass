@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import { useCompass } from '../hooks/useCompass';
 import { useTheme } from '../hooks/useTheme';
+import { typography } from '../theme/typography';
 import { t } from '../i18n';
 import { CalibrationVisualizer } from '../components/CalibrationVisualizer';
 import { AccuracyIndicator } from '../components/AccuracyIndicator';
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.headingBold,
     backgroundColor: 'transparent',
   },
   container: {
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: typography.fontFamily.semibold,
     textAlign: 'center',
     lineHeight: 25,
     backgroundColor: 'transparent',
@@ -141,16 +142,18 @@ const styles = StyleSheet.create({
   },
   statusTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.headingBold,
     backgroundColor: 'transparent',
   },
   statusDesc: {
     fontSize: 13,
+    fontFamily: typography.fontFamily.regular,
     marginTop: 2,
     backgroundColor: 'transparent',
   },
   pendingText: {
     fontSize: 13,
+    fontFamily: typography.fontFamily.regular,
     textAlign: 'center',
     lineHeight: 18,
     backgroundColor: 'transparent',
@@ -164,7 +167,7 @@ const styles = StyleSheet.create({
   doneBtnText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '700',
+    fontFamily: typography.fontFamily.headingBold,
     backgroundColor: 'transparent',
   },
 });
