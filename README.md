@@ -1,29 +1,44 @@
 # 🧭 Multilingual Cyber Compass Application
 
-![Expo SDK 57](https://img.shields.io/badge/Expo-SDK_57-black?style=for-the-badge&logo=expo)
-![React Native](https://img.shields.io/badge/React_Native-0.86.3-61DAFB?style=for-the-badge&logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript)
-![EAS Build](https://img.shields.io/badge/EAS_Build-Ready-000000?style=for-the-badge&logo=expo)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+[![Expo SDK 57](https://img.shields.io/badge/Expo-SDK_57-000000?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev)
+[![React Native](https://img.shields.io/badge/React_Native-0.86.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactnative.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Android & iOS](https://img.shields.io/badge/Platform-Android_%7C_iOS-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://expo.dev)
+[![EAS Build](https://img.shields.io/badge/EAS_Build-Optimized_<1MB-000000?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/accounts/varuunnnnn/projects/multilanguage-compass)
+[![ProGuard R8](https://img.shields.io/badge/Minified-ProGuard_R8-FF6F00?style=for-the-badge&logo=android)](https://developer.android.com/build/shrink-code)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-A commercial-grade real physical sensor compass application built with **React Native**, **TypeScript**, **Expo SDK 57**, and **Native Motion Sensors**. 
+A commercial-grade, real-time physical sensor compass mobile application engineered with **React Native**, **TypeScript 6.0**, **Expo SDK 57**, and **Native Hardware Sensors**. 
 
-Designed with a sleek **Cyber Glassmorphic UI**, **Dynamic Adaptive Filtering**, **Artificial Horizon Level Reticle**, and full **Multilingual Support** (**English**, **Tamil - தமிழ்**, **Hindi - हिन्दी**).
+Featuring a futuristic **Cyber Glassmorphic Design**, **Dynamic Adaptive Filtering**, **Artificial Horizon Level Bubble**, **3D Tilt Compensation**, **True North Magnetic Declination**, and instant **Multilingual Localization** (**English**, **Tamil - தமிழ்**, **Hindi - हिन्दी**).
+
+---
+
+## 🏷️ Keywords & Search Engine Indexing
+
+| Category | SEO Keywords & Target Tags |
+| :--- | :--- |
+| **Primary Stack** | `react-native`, `expo-sdk-57`, `typescript`, `reanimated-4`, `react-native-svg`, `expo-sensors`, `expo-location` |
+| **Mobile Sensors** | `magnetometer`, `accelerometer`, `gyroscope`, `sensor-fusion`, `tilt-compensation`, `low-pass-filter`, `adaptive-filter` |
+| **Navigation & Geolocation** | `compass-app`, `true-north`, `magnetic-north`, `magnetic-declination`, `wmm-model`, `gps-telemetry`, `bearing-lock`, `cardinal-directions` |
+| **UI & UX Design** | `cyberpunk-ui`, `glassmorphism`, `dark-mode`, `hud-display`, `level-bubble`, `artificial-horizon`, `tabular-nums` |
+| **Localization (i18n)** | `multilingual-app`, `internationalization`, `tamil-language`, `hindi-language`, `english-language`, `react-native-i18n` |
+| **DevOps & Build System** | `expo-eas-build`, `eas-cli`, `android-apk`, `app-bundle-aab`, `cng`, `proguard-r8`, `tree-shaking`, `hermes-engine` |
 
 ---
 
 ## 🌟 Key Features
 
-* **⚡ Physical Motion Sensors**: Directly processes hardware `Magnetometer` & `Accelerometer` data from iOS and Android devices.
-* **🎯 Level Bubble & Artificial Horizon Reticle**: Integrated central pitch/roll target bubble that locks emerald green when level ($\le 5^\circ$) for maximum heading precision.
-* **🚀 Dynamic Adaptive Velocity-Scaling Filter**: Dynamically scales smoothing alpha ($\alpha = 0.06 \to 0.35$) to ensure zero micro-jitter when holding still while delivering instant, zero-lag response during rapid turns.
-* **📐 3D Tilt Compensation**: Computes Roll ($\phi$) and Pitch ($\theta$) gravity vectors to calculate tilt-compensated heading even when holding the device at an angle.
+* **⚡ Physical Hardware Sensor Engine**: Processes raw `Magnetometer` ($m_x, m_y, m_z$) and `Accelerometer` ($a_x, a_y, a_z$) vector data directly from Android & iOS hardware.
+* **🎯 Artificial Horizon Level Bubble**: Central target reticle locks vibrant emerald green when device tilt is level ($\le 5^\circ$) for military-grade heading accuracy.
+* **🚀 Dynamic Adaptive Velocity-Scaling Filter**: Dynamically scales smoothing alpha ($\alpha = 0.06 \to 0.35$) to eliminate micro-jitter when stationary while guaranteeing zero latency during rapid 360° turns.
+* **📐 3D Tilt Compensation Math**: Calculates Roll ($\phi$) and Pitch ($\theta$) gravity vectors to maintain true heading alignment regardless of phone holding angle.
 * **🌍 True North vs Magnetic North**: Calculates real-time magnetic declination via device GPS location and World Magnetic Model (WMM) formulas.
-* **🌐 Multilingual UI Engine**: Full native translations for **English**, **Tamil (தமிழ்)**, and **Hindi (हिन्दी)** with instant bottom-sheet locale switching and persistent preferences.
-* **🔒 Target Bearing Lock**: Lock a target heading angle and monitor real-time angular drift delta (`+24°`, `-10°`).
-* **📍 Telemetry & Location Card**: Tabular readout of Latitude, Longitude, Altitude, Declination, and Accuracy with single-tap clipboard copy and native share.
-* **🎨 Cyber Glassmorphic Design**: Modern dark mode (`#070A11`) & light mode with glowing cyan accents (`#38BDF8`), neon crimson North markers (`#FF3B30`), and tabular typography (`tabular-nums`).
-* **🔄 Interactive Figure-8 Calibration**: Real-time sensor health evaluation with an animated 3D lemniscate guide for recalibration.
+* **🌐 Multilingual Localization Engine**: Instant bottom-sheet language switcher supporting **English**, **Tamil (தமிழ்)**, and **Hindi (हिन्दी)** with persistent storage.
+* **🔒 Target Bearing Lock**: Lock a target bearing angle and track real-time angular drift deltas (`+24°`, `-10°`).
+* **📍 Geolocation Telemetry Card**: Real-time GPS Latitude, Longitude, Altitude, Declination angle, and Sensor Accuracy with single-tap clipboard copy and native sharing.
+* **🎨 Cyber Glassmorphic Visuals**: Modern dark mode palette (`#070A11`) with glowing cyan accents (`#38BDF8`), neon crimson North markers (`#FF3B30`), and tabular typography (`tabular-nums`).
+* **🔄 Interactive Figure-8 Calibration Walkthrough**: Animated 3D lemniscate calibration guide with real-time magnetometer accuracy monitoring.
 
 ---
 
@@ -197,9 +212,6 @@ git status
 # 2. Push commits to GitHub master branch
 git push origin master
 ```
-
-Once pushed, all updates will instantly reflect on your GitHub repository page at:
-`https://github.com/varun-8/multilingual-navigation-compass`
 
 ---
 
