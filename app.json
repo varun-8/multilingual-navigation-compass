@@ -2,6 +2,7 @@
   "expo": {
     "name": "Multilingual Compass",
     "slug": "multilanguage-compass",
+    "owner": "varuunnnnn",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -43,6 +44,11 @@
       ],
       "expo-sharing",
       "expo-status-bar"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d6fa664f-e6db-4b70-aa9f-cfe36f5cc873"
+      }
+    }
   }
 }
