@@ -36,21 +36,9 @@ $RECYCLE.BIN/
 *.key
 *.mobileprovision
 
-# Native Android build artifacts
-android/.gradle/
-android/app/build/
-android/build/
-android/captures/
-android/.idea/
-android/local.properties
-
-# Native iOS build artifacts
-ios/build/
-ios/Pods/
-ios/DerivedData/
-ios/*.xcworkspace/xcuserdata/
-ios/*.xcodeproj/project.xcworkspace/xcuserdata/
-ios/*.xcodeproj/xcuserdata/
+# Native directories (generated dynamically via Continuous Native Generation - CNG)
+/android/
+/ios/
 
 # TypeScript & build caches
 *.tsbuildinfo
